@@ -1,4 +1,4 @@
-import 'package:appembe/screen/widget/CountdownTimer.dart';
+import 'package:appembe/widget/CountdownTimer.dart';
 import 'package:flutter/material.dart';
 
 class FlashSaleSection extends StatelessWidget {

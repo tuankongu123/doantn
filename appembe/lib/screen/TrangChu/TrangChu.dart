@@ -1,12 +1,12 @@
-import 'package:appembe/screen/ThongTinTaiKhoan.dart';
-import 'package:appembe/screen/widget/Banner.dart';
-import 'package:appembe/screen/widget/ThanhDieuHuong.dart';
-import 'package:appembe/screen/widget/ThanhChucNang.dart';
-import 'package:appembe/screen/widget/FlashSaleSection.dart';
-import 'package:appembe/screen/widget/ThanhTimKiem.dart';
+import 'package:appembe/screen/ThongTinTaiKhoan/MH_ThongTinTaiKhoan.dart';
+import 'package:appembe/widget/Banner.dart';
+import 'package:appembe/widget/ThanhDieuHuong.dart';
+import 'package:appembe/widget/ThanhChucNang.dart';
+import 'package:appembe/widget/FlashSaleSection.dart';
+import 'package:appembe/widget/ThanhTimKiem.dart';
 import 'package:flutter/material.dart';
-import 'package:appembe/screen/DanhMuc.dart';
-import 'package:appembe/screen/ThongBao.dart';
+import 'package:appembe/screen/DanhMuc/DanhMuc.dart';
+import 'package:appembe/screen/ThongBao/ThongBao.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

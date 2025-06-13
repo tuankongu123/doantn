@@ -1,3 +1,5 @@
+import 'package:appembe/screen/ThongTinTaiKhoan/SoDiaChi.dart';
+import 'package:appembe/screen/ThongTinTaiKhoan/ThongTinCaNhan.dart';
 import 'package:flutter/material.dart';
 
 class MH_ThongTinTaiKhoan extends StatelessWidget {
@@ -71,10 +73,34 @@ class MH_ThongTinTaiKhoan extends StatelessWidget {
                   title: Text(item['label']),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Chọn: ${item['label']}')),
-                    );
-                  },
+  switch (item['label']) {
+    case 'Thông tin tài khoản':
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ThongTinCaNhanScreen()),
+      );
+      break;
+
+    case 'Sổ địa chỉ':
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SoDiaChiScreen()),
+      );
+      break;
+
+    // Thêm case khác nếu có:
+    // case 'Thông báo của tôi':
+    //   Navigator.push(...);
+    //   break;
+
+    default:
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Chọn: ${item['label']}')),
+      );
+  }
+},
+
+
                 );
               },
             ),
@@ -90,10 +116,10 @@ class MH_ThongTinTaiKhoan extends StatelessWidget {
                 Icon(Icons.phone, color: Colors.lightBlue),
                 SizedBox(width: 8),
                 Text(
-                  'Tư vấn bán hàng  ',
+                  'Tư vấn bán hàng   ',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                Text('1800.6608', style: TextStyle(color: Colors.lightBlue)),
+                Text('0969427271', style: TextStyle(color: Colors.lightBlue)),
               ],
             ),
           ),
