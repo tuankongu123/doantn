@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ProductMenuScreen extends StatelessWidget {
-  const ProductMenuScreen({super.key});
+class MH_DanhMuc extends StatelessWidget {
+  const MH_DanhMuc({super.key});
 
   final List<Map<String, dynamic>> categories = const [
     {'title': 'Mẹ bầu và sau sinh', 'color': Color(0xFFFFEB3B), 'icon': Icons.favorite},

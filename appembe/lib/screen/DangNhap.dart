@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class Mh_DangNhap extends StatelessWidget {
+  const Mh_DangNhap({super.key});
 
   @override
   Widget build(BuildContext context) {

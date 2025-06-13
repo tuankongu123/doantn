@@ -1,12 +1,12 @@
-import 'package:appembe/screen/AccountInfoScreen.dart';
-import 'package:appembe/screen/Banner.dart';
-import 'package:appembe/screen/CustomBottomNavBar.dart';
-import 'package:appembe/screen/FeatureMenu.dart';
-import 'package:appembe/screen/FlashSaleSection.dart';
-import 'package:appembe/screen/SearchBar.dart';
+import 'package:appembe/screen/ThongTinTaiKhoan.dart';
+import 'package:appembe/screen/widget/Banner.dart';
+import 'package:appembe/screen/widget/ThanhDieuHuong.dart';
+import 'package:appembe/screen/widget/ThanhChucNang.dart';
+import 'package:appembe/screen/widget/FlashSaleSection.dart';
+import 'package:appembe/screen/widget/ThanhTimKiem.dart';
 import 'package:flutter/material.dart';
-import 'package:appembe/screen/Menu.dart';
-import 'package:appembe/screen/Notification.dart';
+import 'package:appembe/screen/DanhMuc.dart';
+import 'package:appembe/screen/ThongBao.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -33,7 +33,7 @@ class _HomeState extends State<Home> {
       child: Scaffold(
         appBar: _selectedIndex == 3 || _selectedIndex == 4
             ? null // 👉 Ẩn AppBar nếu là tab Notification
-            : const CustomSearchAppBar(), // 🔍 Chỉ hiện với các tab khác
+            : const TP_ThanhTimKiem(), // 🔍 Chỉ hiện với các tab khác
         body: PageView(
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
@@ -45,7 +45,7 @@ class _HomeState extends State<Home> {
                 children: const [
                   Baner(),
                   SizedBox(height: 12),
-                  HorizontalFeatureMenu(),
+                  TP_ThanhChucNang(),
                   SizedBox(height: 20),
                   FlashSaleSection(),
                   SizedBox(height: 150),
@@ -56,20 +56,20 @@ class _HomeState extends State<Home> {
             ),
 
             // Trang 1: Danh mục
-            const ProductMenuScreen(),
+            const MH_DanhMuc(),
 
             // Trang 2: Ưu đãi
             const Center(child: Text('Ưu đãi đặc biệt')),
 
             // Trang 3: Thông báo
-            const NotificationScreen(),
+            const MH_ThongBao(),
 
             // Trang 4: Cá nhân
-            const AccountInfoScreen(),
+            const MH_ThongTinTaiKhoan(),
           ],
         ),
 
-        bottomNavigationBar: CustomBottomNavBar(
+        bottomNavigationBar: TP_ThanhDieuHuong(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
         ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class HorizontalFeatureMenu extends StatelessWidget {
-  const HorizontalFeatureMenu({super.key});
+class TP_ThanhChucNang extends StatelessWidget {
+  const TP_ThanhChucNang({super.key});
 
   @override
   Widget build(BuildContext context) {

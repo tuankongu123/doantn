@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class CustomSearchAppBar extends StatelessWidget implements PreferredSizeWidget {
+class TP_ThanhTimKiem extends StatelessWidget implements PreferredSizeWidget {
   final TextEditingController? controller;
   final void Function(String)? onSubmitted;
 
-  const CustomSearchAppBar({super.key, this.controller, this.onSubmitted});
+  const TP_ThanhTimKiem({super.key, this.controller, this.onSubmitted});
 
   @override
   Size get preferredSize => const Size.fromHeight(70);

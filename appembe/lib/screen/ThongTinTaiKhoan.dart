@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AccountInfoScreen extends StatelessWidget {
-  const AccountInfoScreen({super.key});
+class MH_ThongTinTaiKhoan extends StatelessWidget {
+  const MH_ThongTinTaiKhoan({super.key});
 
   final List<Map<String, dynamic>> accountOptions = const [
     {'icon': Icons.person, 'label': 'Thông tin tài khoản'},
@@ -41,11 +41,17 @@ class AccountInfoScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text('Xin chào', style: TextStyle(color: Colors.white70)),
-                    Text('nhan nhan', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(
+                      'nhan nhan',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
                 const Spacer(),
-                
               ],
             ),
           ),
@@ -83,7 +89,10 @@ class AccountInfoScreen extends StatelessWidget {
               children: const [
                 Icon(Icons.phone, color: Colors.lightBlue),
                 SizedBox(width: 8),
-                Text('Tư vấn bán hàng  ', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Tư vấn bán hàng  ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text('1800.6608', style: TextStyle(color: Colors.lightBlue)),
               ],
             ),

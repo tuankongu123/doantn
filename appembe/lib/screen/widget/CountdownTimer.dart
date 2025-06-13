@@ -61,10 +61,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       color: Colors.black,
-      child: Text(
-        value,
-        style: const TextStyle(color: Colors.white),
-      ),
+      child: Text(value, style: const TextStyle(color: Colors.white)),
     );
   }
 }
