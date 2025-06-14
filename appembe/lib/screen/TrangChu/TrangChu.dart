@@ -4,6 +4,7 @@ import 'package:appembe/widget/ThanhDieuHuong.dart';
 import 'package:appembe/widget/ThanhChucNang.dart';
 import 'package:appembe/widget/FlashSaleSection.dart';
 import 'package:appembe/widget/ThanhTimKiem.dart';
+import 'package:appembe/widget/SanPham.dart';
 import 'package:flutter/material.dart';
 import 'package:appembe/screen/DanhMuc/DanhMuc.dart';
 import 'package:appembe/screen/ThongBao/ThongBao.dart';
@@ -48,6 +49,8 @@ class _HomeState extends State<Home> {
                   TP_ThanhChucNang(),
                   SizedBox(height: 20),
                   FlashSaleSection(),
+                  SizedBox(height: 20),
+                  DanhSachSanPham(),
                   SizedBox(height: 150),
                   SizedBox(height: 10),
                   SizedBox(height: 120),

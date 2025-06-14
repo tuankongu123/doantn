@@ -7,21 +7,21 @@ class FlashSaleSection extends StatelessWidget {
   // Dữ liệu mẫu
   final List<Map<String, dynamic>> products = const [
     {
-      'image': 'https://via.placeholder.com/100x120.png?text=SP1',
+      'image': 'assets/images/lan_chong_muoi.jfif',
       'name': 'Lăn chống muỗi Chicco 60ml',
       'discount': 15,
       'originalPrice': 265000,
       'salePrice': 229000,
     },
     {
-      'image': 'https://via.placeholder.com/100x120.png?text=SP2',
-      'name': 'Sữa bầu Morinaga vị Cafe Nhật (216g)',
+      'image': 'assets/images/sua_nan.jfif',
+      'name': 'Sữa nan Morinaga vị Cafe Nhật (216g)',
       'discount': 16,
       'originalPrice': 230000,
       'salePrice': 190000,
     },
     {
-      'image': 'https://via.placeholder.com/100x120.png?text=SP3',
+      'image': 'assets/images/kem_duong_am.jfif',
       'name': 'Kem dưỡng ẩm Chicco 100ml',
       'discount': 12,
       'originalPrice': 210000,
@@ -73,7 +73,7 @@ class FlashSaleSection extends StatelessWidget {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
+                          child: Image.asset(
                             product['image'],
                             width: 150,
                             height: 100,
