@@ -1,3 +1,4 @@
+import 'package:appembe/screen/GIoHang/GioHangScreen.dart';
 import 'package:flutter/material.dart';
 
 class TP_ThanhTimKiem extends StatelessWidget implements PreferredSizeWidget {
@@ -42,9 +43,21 @@ class TP_ThanhTimKiem extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined, color: Colors.cyan),
+                  icon: const Icon(
+                    Icons.shopping_cart_outlined,
+                    color: Colors.cyan,
+                  ),
                   onPressed: () {
                     // TODO: xử lý giỏ hàng
+                    // 👇 Chuyển đến màn hình giỏ hàng
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const GioHangScreen(
+                          nguoiDungId: 1,
+                        ), // sửa ID tùy người dùng
+                      ),
+                    );
                   },
                 ),
               ],

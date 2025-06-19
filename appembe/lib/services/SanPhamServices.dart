@@ -16,4 +16,21 @@ class SanPhamService {
       throw Exception("Không thể tải danh sách sản phẩm");
     }
   }
+
+  static Future<List<SanPham>> fetchByDanhMucId(int danhMucId) async {
+    final url = Uri.parse(
+      'http://10.0.2.2/app_api/DanhMuc/get_sanpham_by_danhmuc.php?danhMucId=$danhMucId',
+    );
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        return List<SanPham>.from(
+          data['data'].map((item) => SanPham.fromJson(item)),
+        );
+      }
+    }
+    return [];
+  }
 }

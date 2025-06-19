@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "49601388756",
+    "project_id": "do-an-ef3cd",
+    "storage_bucket": "do-an-ef3cd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49601388756:android:0ba793552f416ccb041b41",
+        "android_client_info": {
+          "package_name": "com.example.appembe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVgJoYVP8fksc5KmmcWcpRBgwXenCu8oY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
