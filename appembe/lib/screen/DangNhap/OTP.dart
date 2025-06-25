@@ -1,5 +1,7 @@
+import 'package:appembe/services/NguoiDungService.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:appembe/screen/TrangChu/TrangChu.dart';
 
 class OTPScreen extends StatefulWidget {
@@ -30,14 +32,35 @@ class _OTPScreenState extends State<OTPScreen> {
       );
       await FirebaseAuth.instance.signInWithCredential(credential);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("🎉 Xác thực thành công")));
+      final user = FirebaseAuth.instance.currentUser;
+      final firebaseUid = user?.uid;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const Home()),
-      );
+      if (firebaseUid != null) {
+        final nguoiDungId = await NguoiDungService.layHoacTaoNguoiDungId(
+          firebaseUid,
+          widget.phoneNumber,
+        );
+
+        if (nguoiDungId != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setInt('nguoiDungId', nguoiDungId);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("🎉 Xác thực thành công")),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const Home()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("❗ Không tìm thấy người dùng trong hệ thống"),
+            ),
+          );
+        }
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,

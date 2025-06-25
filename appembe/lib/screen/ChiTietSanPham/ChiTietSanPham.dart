@@ -1,6 +1,7 @@
 import 'package:appembe/screen/GIoHang/GioHangScreen.dart';
 import 'package:flutter/material.dart';
 import '../../../model/SanPhamModel.dart';
+import 'package:appembe/services/GioHangServices.dart';
 
 class ChiTietSanPham extends StatelessWidget {
   final SanPham sanPham;
@@ -71,20 +72,30 @@ class ChiTietSanPham extends StatelessWidget {
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.add_shopping_cart),
                 label: const Text("Thêm vào giỏ hàng"),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Đã thêm vào giỏ hàng")),
+                onPressed: () async {
+                  final success = await GioHangService.themVaoGioHang(
+                    1, // giả sử bạn đang test với id người dùng = 1
+                    sanPham.id,
+                    1, // số lượng mặc định là 1
                   );
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("✅ Đã thêm vào giỏ hàng")),
+                    );
 
-                  // 👇 Chuyển đến màn hình giỏ hàng
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const GioHangScreen(
-                        nguoiDungId: 1,
-                      ), // sửa ID tùy người dùng
-                    ),
-                  );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const GioHangScreen(nguoiDungId: 1),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("❌ Thêm vào giỏ hàng thất bại"),
+                      ),
+                    );
+                  }
                 },
               ),
             ),

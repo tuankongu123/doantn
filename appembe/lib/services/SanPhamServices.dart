@@ -33,4 +33,39 @@ class SanPhamService {
     }
     return [];
   }
+
+  static Future<List<SanPham>> fetchByThuongHieuId(int thuongHieuId) async {
+    final url = Uri.parse(
+      'http://10.0.2.2/app_api/SanPham/get_sanpham_by_thuonghieu.php?thuongHieuId=$thuongHieuId',
+    );
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['status'] == 'success') {
+        return List<SanPham>.from(
+          data['data'].map((item) => SanPham.fromJson(item)),
+        );
+      }
+    }
+    return [];
+  }
+
+  static Future<List<SanPham>> fetchByDanhMucAndThuongHieu(
+    int danhMucId,
+    int thuongHieuId,
+  ) async {
+    final response = await http.get(
+      Uri.parse(
+        'http://10.0.2.2/app_api/SanPham/get_sanpham_by_danhmuc_thuonghieu.php?danhMucId=$danhMucId&thuongHieuId=$thuongHieuId',
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = json.decode(response.body);
+      return jsonList.map((e) => SanPham.fromJson(e)).toList();
+    } else {
+      throw Exception('Không thể tải sản phẩm theo danh mục và thương hiệu');
+    }
+  }
 }

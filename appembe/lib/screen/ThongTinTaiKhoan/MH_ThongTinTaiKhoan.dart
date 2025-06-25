@@ -1,9 +1,19 @@
+import 'package:flutter/material.dart';
+import 'package:appembe/model/NguoiDungModel.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/SoDiaChi.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/ThongTinCaNhan.dart';
-import 'package:flutter/material.dart';
+import 'package:appembe/services/NguoiDungService.dart';
 
-class MH_ThongTinTaiKhoan extends StatelessWidget {
+class MH_ThongTinTaiKhoan extends StatefulWidget {
   const MH_ThongTinTaiKhoan({super.key});
+
+  @override
+  State<MH_ThongTinTaiKhoan> createState() => _MH_ThongTinTaiKhoanState();
+}
+
+class _MH_ThongTinTaiKhoanState extends State<MH_ThongTinTaiKhoan> {
+  NguoiDung? _nguoiDung;
+  bool _isLoading = true;
 
   final List<Map<String, dynamic>> accountOptions = const [
     {'icon': Icons.person, 'label': 'Thông tin tài khoản'},
@@ -22,109 +32,150 @@ class MH_ThongTinTaiKhoan extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _taiThongTinNguoiDung();
+  }
+
+  void _taiThongTinNguoiDung() async {
+    const int id = 1; // Tạm test cố định
+    final nguoiDung = await NguoiDungService.layThongTinNguoiDung(id);
+
+    if (mounted) {
+      setState(() {
+        _nguoiDung = nguoiDung;
+        _isLoading = false;
+      });
+    }
+
+    if (nguoiDung == null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Không tìm thấy người dùng")),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      body: Column(
-        children: [
-          // 🔷 Header thông tin người dùng
-          Container(
-            color: Colors.lightBlue,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Row(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
               children: [
-                const CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.white,
-                  child: Text('n', style: TextStyle(fontSize: 24)),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Xin chào', style: TextStyle(color: Colors.white70)),
-                    Text(
-                      'nhan nhan',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-              ],
-            ),
-          ),
-
-          // 📝 Danh sách chức năng tài khoản
-          Expanded(
-            child: ListView.separated(
-              itemCount: accountOptions.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final item = accountOptions[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.lightBlueAccent,
-                    child: Icon(item['icon'], color: Colors.white, size: 20),
+                // 🔷 Header thông tin người dùng
+                Container(
+                  color: Colors.lightBlue,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
                   ),
-                  title: Text(item['label']),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-  switch (item['label']) {
-    case 'Thông tin tài khoản':
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const ThongTinCaNhanScreen()),
-      );
-      break;
-
-    case 'Sổ địa chỉ':
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const SoDiaChiScreen()),
-      );
-      break;
-
-    // Thêm case khác nếu có:
-    // case 'Thông báo của tôi':
-    //   Navigator.push(...);
-    //   break;
-
-    default:
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Chọn: ${item['label']}')),
-      );
-  }
-},
-
-
-                );
-              },
-            ),
-          ),
-
-          // 📞 Tư vấn bán hàng
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            color: Colors.white,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.phone, color: Colors.lightBlue),
-                SizedBox(width: 8),
-                Text(
-                  'Tư vấn bán hàng   ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        radius: 28,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, size: 32, color: Colors.blue),
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Xin chào',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          Text(
+                            _nguoiDung?.hoTen != null &&
+                                    _nguoiDung!.hoTen!.isNotEmpty
+                                ? _nguoiDung!.hoTen!
+                                : 'Người dùng',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
                 ),
-                Text('0969427271', style: TextStyle(color: Colors.lightBlue)),
+
+                // 📝 Danh sách chức năng tài khoản
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: accountOptions.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final item = accountOptions[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.lightBlueAccent,
+                          child: Icon(
+                            item['icon'],
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(item['label']),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          switch (item['label']) {
+                            case 'Thông tin tài khoản':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ThongTinCaNhanScreen(),
+                                ),
+                              );
+                              break;
+
+                            case 'Sổ địa chỉ':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SoDiaChiScreen(),
+                                ),
+                              );
+                              break;
+
+                            default:
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Chọn: ${item['label']}'),
+                                ),
+                              );
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+
+                // 📞 Tư vấn bán hàng
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  color: Colors.white,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.phone, color: Colors.lightBlue),
+                      SizedBox(width: 8),
+                      Text(
+                        'Tư vấn bán hàng   ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '0969427271',
+                        style: TextStyle(color: Colors.lightBlue),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

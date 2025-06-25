@@ -3,36 +3,27 @@ import '../../model/SanPhamModel.dart';
 import '../../services/SanPhamServices.dart';
 import '../screen/ChiTietSanPham/ChiTietSanPham.dart';
 
-class DanhSachSanPham extends StatefulWidget {
-  const DanhSachSanPham({super.key});
+class DanhSachSanPham extends StatelessWidget {
+  final Future<List<SanPham>> futureSanPham;
+  final String? tieuDe;
 
-  @override
-  State<DanhSachSanPham> createState() => _DanhSachSanPhamState();
-}
-
-class _DanhSachSanPhamState extends State<DanhSachSanPham> {
-  late Future<List<SanPham>> _futureSanPham;
-
-  @override
-  void initState() {
-    super.initState();
-    _futureSanPham = SanPhamService.fetchSanPham();
-  }
+  const DanhSachSanPham({super.key, required this.futureSanPham, this.tieuDe});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: Text(
-            'Sản phẩm',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        if (tieuDe != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              tieuDe!,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
         FutureBuilder<List<SanPham>>(
-          future: _futureSanPham,
+          future: futureSanPham,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -44,11 +35,17 @@ class _DanhSachSanPhamState extends State<DanhSachSanPham> {
 
             final sanPham = snapshot.data!;
 
-            return ListView.separated(
-              physics: const NeverScrollableScrollPhysics(),
+            return GridView.builder(
               shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: sanPham.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              padding: const EdgeInsets.only(top: 8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.65,
+              ),
               itemBuilder: (context, index) {
                 final sp = sanPham[index];
                 return InkWell(
@@ -61,26 +58,28 @@ class _DanhSachSanPhamState extends State<DanhSachSanPham> {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
                           child: Image.asset(
                             'assets/images/${sp.hinhAnh}',
-                            width: 100,
-                            height: 100,
+                            height: 130,
+                            width: double.infinity,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) =>
                                 const Icon(Icons.broken_image),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -90,31 +89,29 @@ class _DanhSachSanPhamState extends State<DanhSachSanPham> {
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Danh mục: ${sp.danhMuc} - Loại: ${sp.loai}',
+                                'Danh mục: ${sp.danhMuc}',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  fontStyle: FontStyle.italic,
                                   color: Colors.blueGrey,
                                 ),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 4),
                               Text(
                                 '${sp.gia.toStringAsFixed(0)}đ',
                                 style: const TextStyle(
                                   fontSize: 14,
-                                  color: Colors.red,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.red,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right),
                       ],
                     ),
                   ),

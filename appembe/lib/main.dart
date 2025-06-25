@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: 'App Bán Đồ Trẻ Em',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.pink),
-      home: const PhoneNumberScreen(), // chạy màn hình đăng nhập
+      home: const Home(), // chạy màn hình đăng nhập
     );
   }
 }

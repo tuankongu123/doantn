@@ -1,8 +1,12 @@
+import 'package:appembe/model/ThuongHieuModel.dart';
+import 'package:appembe/services/ThuongHieuServices.dart';
+import 'package:appembe/widget/DanhMucWidget.dart';
 import 'package:flutter/material.dart';
 import '../../model/DanhMucModel.dart';
 import '../../model/SanPhamModel.dart';
 import '../../services/DanhMucServices.dart';
 import '../../services/SanPhamServices.dart';
+import '../../widget/SanPham.dart';
 
 class MH_DanhMuc extends StatefulWidget {
   const MH_DanhMuc({super.key});
@@ -13,9 +17,11 @@ class MH_DanhMuc extends StatefulWidget {
 
 class _MH_DanhMucState extends State<MH_DanhMuc> {
   late Future<List<DanhMuc>> _futureDanhMuc;
-  List<SanPham> _sanPhamTheoDanhMuc = [];
   int? _selectedDanhMucId;
   String? _selectedDanhMucTen;
+  Future<List<SanPham>>? _futureSanPhamTheoDanhMuc;
+  Future<List<ThuongHieu>>? _futureThuongHieu;
+  int? _selectedThuongHieuId;
 
   @override
   void initState() {
@@ -23,152 +29,118 @@ class _MH_DanhMucState extends State<MH_DanhMuc> {
     _futureDanhMuc = DanhMucService.fetchDanhMuc();
   }
 
-  Future<void> _loadSanPhamByDanhMuc(int danhMucId, String tenDanhMuc) async {
-    final sanPhamList = await SanPhamService.fetchByDanhMucId(
-      danhMucId,
-    ); // Viết API này
+  void _loadSanPhamByDanhMuc(int danhMucId, String tenDanhMuc) {
     setState(() {
       _selectedDanhMucId = danhMucId;
       _selectedDanhMucTen = tenDanhMuc;
-      _sanPhamTheoDanhMuc = sanPhamList;
+      _selectedThuongHieuId = null;
+      _futureSanPhamTheoDanhMuc = SanPhamService.fetchByDanhMucId(danhMucId);
+      _futureThuongHieu = ThuongHieuService.fetchThuongHieuTheoDanhMuc(
+        danhMucId,
+      );
     });
   }
-
-  Color getRandomColor(int index) {
-    final colors = [
-      Colors.amber.shade100,
-      Colors.pink.shade100,
-      Colors.cyan.shade100,
-      Colors.blue.shade100,
-      Colors.lime.shade100,
-      Colors.green.shade100,
-    ];
-    return colors[index % colors.length];
-  }
-
-  final List<IconData> icons = [
-    Icons.category,
-    Icons.shopping_cart,
-    Icons.baby_changing_station,
-    Icons.favorite,
-    Icons.clean_hands,
-    Icons.toys,
-    Icons.child_care,
-    Icons.shopping_bag,
-    Icons.apple,
-    Icons.soap,
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Danh mục")),
-      body: FutureBuilder<List<DanhMuc>>(
-        future: _futureDanhMuc,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Column(
+        children: [
+          // --- PHẦN DANH MỤC: Cuộn ngang ---
+          FutureBuilder<List<DanhMuc>>(
+            future: _futureDanhMuc,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Không có danh mục nào"));
-          }
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(child: Text("Không có danh mục nào")),
+                );
+              }
 
-          final danhMucs = snapshot.data!;
+              final danhMucs = snapshot.data!;
+              return DanhMucWidget(
+                danhMucs: danhMucs,
+                selectedId: _selectedDanhMucId,
+                onSelect: (danhMuc) {
+                  _loadSanPhamByDanhMuc(danhMuc.id, danhMuc.ten);
+                },
+              );
+            },
+          ),
 
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Danh sách danh mục
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: danhMucs.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisExtent: 90,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
+          // --- PHẦN THƯƠNG HIỆU THEO DANH MỤC ---
+          if (_futureThuongHieu != null)
+            FutureBuilder<List<ThuongHieu>>(
+              future: _futureThuongHieu,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const SizedBox();
+                }
+
+                final thuongHieus = snapshot.data!;
+                return SizedBox(
+                  height: 48,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: thuongHieus.length,
                     itemBuilder: (context, index) {
-                      final item = danhMucs[index];
-                      return GestureDetector(
-                        onTap: () => _loadSanPhamByDanhMuc(item.id, item.ten),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: getRandomColor(index),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                icons[index % icons.length],
-                                size: 32,
-                                color: Colors.blue.shade900,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  item.ten,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                      final th = thuongHieus[index];
+                      final isSelected = th.id == _selectedThuongHieuId;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: ChoiceChip(
+                          label: Text(th.ten),
+                          selected: isSelected,
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedThuongHieuId = th.id;
+                              _futureSanPhamTheoDanhMuc =
+                                  SanPhamService.fetchByDanhMucAndThuongHieu(
+                                    _selectedDanhMucId!,
+                                    _selectedThuongHieuId!,
+                                  );
+                            });
+                          },
                         ),
                       );
                     },
                   ),
-                ),
-
-                const Divider(),
-
-                // Danh sách sản phẩm thuộc danh mục
-                if (_selectedDanhMucId != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Sản phẩm thuộc danh mục: $_selectedDanhMucTen',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  ListView.builder(
-                    itemCount: _sanPhamTheoDanhMuc.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      final sp = _sanPhamTheoDanhMuc[index];
-                      return ListTile(
-                        leading: Image.asset(
-                          'assets/images/${sp.hinhAnh}',
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        ),
-                        title: Text(sp.ten),
-                        subtitle: Text('${sp.gia.toStringAsFixed(0)}đ'),
-                        trailing: const Icon(Icons.chevron_right),
-                      );
-                    },
-                  ),
-                ],
-              ],
+                );
+              },
             ),
-          );
-        },
+
+          const Divider(),
+
+          // --- PHẦN SẢN PHẨM ---
+          Expanded(
+            child:
+                (_selectedDanhMucId != null &&
+                    _futureSanPhamTheoDanhMuc != null)
+                ? DanhSachSanPham(
+                    futureSanPham: _futureSanPhamTheoDanhMuc!,
+                    tieuDe: 'Sản phẩm: $_selectedDanhMucTen',
+                  )
+                : const Center(
+                    child: Text("Vui lòng chọn danh mục để xem sản phẩm"),
+                  ),
+          ),
+        ],
       ),
     );
   }

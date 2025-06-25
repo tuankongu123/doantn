@@ -1,10 +1,12 @@
 import 'package:appembe/screen/ThongTinTaiKhoan/MH_ThongTinTaiKhoan.dart';
+import 'package:appembe/services/SanPhamServices.dart';
 import 'package:appembe/widget/Banner.dart';
 import 'package:appembe/widget/ThanhDieuHuong.dart';
 import 'package:appembe/widget/ThanhChucNang.dart';
 import 'package:appembe/widget/FlashSaleSection.dart';
 import 'package:appembe/widget/ThanhTimKiem.dart';
 import 'package:appembe/widget/SanPham.dart';
+import 'package:appembe/widget/ThuongHieu.dart';
 import 'package:flutter/material.dart';
 import 'package:appembe/screen/DanhMuc/DanhMuc.dart';
 import 'package:appembe/screen/ThongBao/ThongBao.dart';
@@ -43,14 +45,26 @@ class _HomeState extends State<Home> {
             SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                children: const [
+                children: [
                   Baner(),
                   SizedBox(height: 12),
                   TP_ThanhChucNang(),
                   SizedBox(height: 20),
                   FlashSaleSection(),
                   SizedBox(height: 20),
-                  DanhSachSanPham(),
+                  //thuong hieu
+                  Text(
+                    "Thương hiệu nổi bật",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  ThuongHieuListWidget(), // 👈 Widget hiển thị thương hiệu theo hàng ngang
+                  SizedBox(height: 20),
+                  DanhSachSanPham(
+                    futureSanPham: SanPhamService.fetchSanPham(),
+                    tieuDe: 'Tất cả sản phẩm',
+                  ),
+
                   SizedBox(height: 150),
                   SizedBox(height: 10),
                   SizedBox(height: 120),

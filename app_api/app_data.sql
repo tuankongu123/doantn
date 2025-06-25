@@ -111,14 +111,41 @@ INSERT INTO GiaTriThuocTinh (sanPhamId, thuocTinhId, giaTri) VALUES
 CREATE TABLE NguoiDung (
     firebaseUid VARCHAR(128) UNIQUE,
     id INT AUTO_INCREMENT PRIMARY KEY,
+    hinhAnh TEXT,
     hoTen VARCHAR(100),
     soDienThoai VARCHAR(15) UNIQUE,
-    diaChi TEXT,
+    gioiTinh ENUM('Nam', 'Nữ'),
+    email VARCHAR(100),
+    ngaySinh DATE,
     vaiTro ENUM('user','admin') DEFAULT 'user',
     xacThuc BOOLEAN DEFAULT FALSE,
     ngayTao DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
+INSERT INTO NguoiDung (
+    firebaseUid, hoTen, soDienThoai, gioiTinh, email, ngaySinh, vaiTro, xacThuc, ngayTao
+) VALUES 
+(
+    'sei42SOgx7XwoAWWg1A6KngNdyg1',
+    '',
+    '0987654321',
+    '',
+    '',
+    NULL,
+    'user',
+    1,
+    '2025-06-19 20:57:58'
+),
+(
+    'uid_admin_67890',
+    '',
+    '0912345678',
+    '',
+    '',
+    NULL,
+    'admin',
+    1,
+    '2025-06-19 20:58:48'
+);
 -- OTP gửi qua SMS
 CREATE TABLE OTP (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -284,6 +311,18 @@ CREATE TABLE BaoCaoThongKe (
 CREATE TABLE SoDiaChi (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nguoiDungId INT,
+    tenNguoiNhan VARCHAR(100),
+    soDienThoai VARCHAR(15),
     diaChi TEXT,
+    FOREIGN KEY (nguoiDungId) REFERENCES NguoiDung(id)
+);
+CREATE TABLE HoSoBe (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nguoiDungId INT,
+    tenBe VARCHAR(100) NOT NULL,
+    ngaySinh DATE,
+    gioiTinh ENUM('Nam', 'Nữ'),
+    ghiChu TEXT,
+    ngayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (nguoiDungId) REFERENCES NguoiDung(id)
 );

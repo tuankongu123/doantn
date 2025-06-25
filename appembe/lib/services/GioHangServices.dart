@@ -3,36 +3,31 @@ import 'package:http/http.dart' as http;
 import '../model/GioHangModel.dart';
 
 class GioHangService {
-  static const String _baseUrl = "http://10.0.2.2/app_api/GioHang";
+  static const String baseUrl = "http://10.0.2.2/app_api/GioHang/";
 
-  /// Lấy danh sách sản phẩm trong giỏ hàng theo người dùng
-  static Future<List<GioHangItem>> fetchGioHang(int nguoiDungId) async {
+  static Future<List<GioHangItem>> layGioHang(int nguoiDungId) async {
     final response = await http.get(
-      Uri.parse("$_baseUrl/lay_giohang.php?nguoiDungId=$nguoiDungId"),
+      Uri.parse("$baseUrl/lay_giohang.php?nguoiDungId=$nguoiDungId"),
     );
 
     if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      if (jsonData["status"] == "success") {
-        return (jsonData["data"] as List)
+      final data = json.decode(response.body);
+      if (data["status"] == "success") {
+        return (data["data"] as List)
             .map((item) => GioHangItem.fromJson(item))
             .toList();
-      } else {
-        throw Exception("Dữ liệu trả về không thành công");
       }
-    } else {
-      throw Exception("Lỗi khi tải giỏ hàng");
     }
+    return [];
   }
 
-  /// Thêm sản phẩm vào giỏ hàng
-  static Future<bool> themVaoGioHang({
-    required int nguoiDungId,
-    required int sanPhamId,
-    required int soLuong,
-  }) async {
+  static Future<bool> themVaoGioHang(
+    int nguoiDungId,
+    int sanPhamId,
+    int soLuong,
+  ) async {
     final response = await http.post(
-      Uri.parse("$_baseUrl/them_giohang.php"),
+      Uri.parse("$baseUrl/them_giohang.php"),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         "nguoiDungId": nguoiDungId,
@@ -41,11 +36,42 @@ class GioHangService {
       }),
     );
 
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      return jsonData["status"] == "success";
-    } else {
-      return false;
-    }
+    print('Response: ${response.body}');
+
+    return response.statusCode == 200 &&
+        json.decode(response.body)['status'] == 'success';
+  }
+
+  static Future<bool> xoaKhoiGioHang(int gioHangId) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/xoa_giohang.php"),
+      body: json.encode({"gioHangId": gioHangId}),
+    );
+    return response.statusCode == 200 &&
+        json.decode(response.body)['status'] == 'success';
+  }
+
+  static Future<bool> capNhatSoLuong(int gioHangId, int soLuong) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/capnhat_soluong_giohang.php"),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({"gioHangId": gioHangId, "soLuong": soLuong}),
+    );
+
+    print('Cap nhat: ${response.body}');
+
+    return response.statusCode == 200 &&
+        json.decode(response.body)['status'] == 'success';
+  }
+
+  static Future<bool> xoaGioHangTheoNguoiDung(int nguoiDungId) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/xoa_giohang_theo_nguoidung.php"),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({"nguoiDungId": nguoiDungId}),
+    );
+
+    return response.statusCode == 200 &&
+        json.decode(response.body)['status'] == 'success';
   }
 }
