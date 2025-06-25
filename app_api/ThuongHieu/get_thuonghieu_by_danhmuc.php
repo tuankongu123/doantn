@@ -5,12 +5,12 @@ include("../config/db.php");
 try {
     $conn->set_charset("utf8mb4");
 
-    if (!isset($_GET['id_danhmuc'])) {
+    if (!isset($_GET['danhMucId'])) {
         echo json_encode([]);
         exit;
     }
 
-    $idDanhMuc = intval($_GET['id_danhmuc']);
+    $idDanhMuc = intval($_GET['danhMucId']);
 
     // Truy vấn lấy thương hiệu theo danh mục
     $sql = "

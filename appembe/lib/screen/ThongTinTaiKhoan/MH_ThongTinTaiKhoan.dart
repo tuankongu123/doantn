@@ -1,3 +1,4 @@
+import 'package:appembe/screen/ThongTinTaiKhoan/SoBeYeu.dart';
 import 'package:flutter/material.dart';
 import 'package:appembe/model/NguoiDungModel.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/SoDiaChi.dart';
@@ -17,6 +18,7 @@ class _MH_ThongTinTaiKhoanState extends State<MH_ThongTinTaiKhoan> {
 
   final List<Map<String, dynamic>> accountOptions = const [
     {'icon': Icons.person, 'label': 'Thông tin tài khoản'},
+    {'icon': Icons.child_care, 'label': 'Thông tin của bé'},
     {'icon': Icons.list_alt, 'label': 'Quản lý đơn hàng'},
     {'icon': Icons.location_on, 'label': 'Sổ địa chỉ'},
     {'icon': Icons.notifications, 'label': 'Thông báo của tôi'},
@@ -140,7 +142,15 @@ class _MH_ThongTinTaiKhoanState extends State<MH_ThongTinTaiKhoan> {
                                 ),
                               );
                               break;
-
+                            case 'Thông tin của bé':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SoBeYeuScreen(),
+                                ),
+                              );
+                              break;
+                              break;
                             default:
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

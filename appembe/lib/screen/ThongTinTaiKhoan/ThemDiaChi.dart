@@ -1,94 +1,99 @@
-
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class ThemDiaChiScreen extends StatefulWidget {
-  final Function(Map<String, dynamic>) onSave;
-  const ThemDiaChiScreen({super.key, required this.onSave});
+class ThemDiaChi extends StatefulWidget {
+  const ThemDiaChi({Key? key}) : super(key: key);
 
   @override
-  State<ThemDiaChiScreen> createState() => _ThemDiaChiScreenState();
+  State<ThemDiaChi> createState() => _ThemDiaChiState();
 }
 
-class _ThemDiaChiScreenState extends State<ThemDiaChiScreen> {
-  final hoTenController = TextEditingController();
-  final sdtController = TextEditingController();
-  final diaChiController = TextEditingController();
-  bool macDinh = false;
-  String loai = 'Văn phòng';
+class _ThemDiaChiState extends State<ThemDiaChi> {
+  final _tenController = TextEditingController();
+  final _sdtController = TextEditingController();
+  final _diaChiController = TextEditingController();
+
+  void _themDiaChi() async {
+    final ten = _tenController.text.trim();
+    final sdt = _sdtController.text.trim();
+    final diaChi = _diaChiController.text.trim();
+
+    if (ten.isEmpty || sdt.isEmpty || diaChi.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Vui lòng điền đầy đủ thông tin")));
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+          "http://10.0.2.2/app_api/DiaChi/Them_Dia_Chi.php",
+        ), // đổi thành URL thật
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "action": "them",
+          "nguoiDungId": 1,
+          "tenNguoiNhan": ten,
+          "soDienThoai": sdt,
+          "diaChi": diaChi,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("✅ Thêm địa chỉ thành công")));
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("❌ Lỗi thêm địa chỉ")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Lỗi kết nối đến server")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Thêm Địa Chỉ Nhận Hàng"), centerTitle: true),
+      appBar: AppBar(title: Text("Thêm Địa Chỉ")),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: ListView(
+        child: Column(
           children: [
-            const Text("Liên hệ", style: TextStyle(color: Colors.grey)),
-            _buildInput(hoTenController, "Họ và tên"),
-            _buildInput(sdtController, "Số điện thoại"),
-            const SizedBox(height: 16),
-            const Text("Địa chỉ", style: TextStyle(color: Colors.grey)),
-            _buildInput(diaChiController, "Tên đường, Tòa nhà, Số nhà", suffixIcon: Icons.chevron_right),
-            const SizedBox(height: 16),
-            const Text("Cài đặt", style: TextStyle(color: Colors.grey)),
-            SwitchListTile(
-              title: const Text("Đặt làm địa chỉ mặc định"),
-              value: macDinh,
-              onChanged: (val) => setState(() => macDinh = val),
+            TextField(
+              controller: _tenController,
+              decoration: InputDecoration(labelText: "Tên người nhận"),
             ),
-            const Text("Loại địa chỉ"),
-            Row(
-              children: [
-                ChoiceChip(
-                  label: const Text("Văn phòng"),
-                  selected: loai == "Văn phòng",
-                  onSelected: (val) => setState(() => loai = "Văn phòng"),
-                ),
-                const SizedBox(width: 12),
-                ChoiceChip(
-                  label: const Text("Nhà riêng"),
-                  selected: loai == "Nhà riêng",
-                  onSelected: (val) => setState(() => loai = "Nhà riêng"),
-                ),
-              ],
+            SizedBox(height: 12),
+            TextField(
+              controller: _sdtController,
+              decoration: InputDecoration(labelText: "Số điện thoại"),
+              keyboardType: TextInputType.phone,
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: 12),
+            TextField(
+              controller: _diaChiController,
+              decoration: InputDecoration(labelText: "Địa chỉ"),
+            ),
+            SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                final newData = {
-                  "name": hoTenController.text,
-                  "phone": sdtController.text,
-                  "address": diaChiController.text,
-                  "macDinh": macDinh,
-                  "loai": loai,
-                };
-                widget.onSave(newData);
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.pink, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Text("Xác nhận", style: TextStyle(color: Colors.white)),
+              onPressed: _themDiaChi,
+              child: Text("Hoàn thành"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.pink,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
               ),
-            )
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInput(TextEditingController controller, String hint, {IconData? suffixIcon}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hint,
-          suffixIcon: suffixIcon != null ? Icon(suffixIcon) : null,
-          filled: true,
-          fillColor: Colors.grey[200],
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
         ),
       ),
     );

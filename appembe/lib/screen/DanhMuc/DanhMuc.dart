@@ -26,7 +26,22 @@ class _MH_DanhMucState extends State<MH_DanhMuc> {
   @override
   void initState() {
     super.initState();
+
     _futureDanhMuc = DanhMucService.fetchDanhMuc();
+
+    // Sau khi fetch xong danh mục, tự động chọn danh mục có ID = 1
+    _futureDanhMuc.then((danhMucs) {
+      final danhMuc1 = danhMucs.firstWhere(
+        (dm) => dm.id == 1,
+        orElse: () => DanhMuc(
+          id: 1,
+          ten: 'Danh mục 1',
+          moTa: '',
+        ), // fallback nếu không tìm thấy
+      );
+
+      _loadSanPhamByDanhMuc(danhMuc1.id, danhMuc1.ten);
+    });
   }
 
   void _loadSanPhamByDanhMuc(int danhMucId, String tenDanhMuc) {
@@ -66,64 +81,76 @@ class _MH_DanhMucState extends State<MH_DanhMuc> {
               }
 
               final danhMucs = snapshot.data!;
-              return DanhMucWidget(
-                danhMucs: danhMucs,
-                selectedId: _selectedDanhMucId,
-                onSelect: (danhMuc) {
-                  _loadSanPhamByDanhMuc(danhMuc.id, danhMuc.ten);
-                },
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DanhMucWidget(
+                    danhMucs: danhMucs,
+                    selectedId: _selectedDanhMucId,
+                    onSelect: (danhMuc) {
+                      _loadSanPhamByDanhMuc(danhMuc.id, danhMuc.ten);
+                    },
+                  ),
+
+                  const SizedBox(height: 8),
+                  Text("Thương hiệu"),
+
+                  // GỌI THƯƠNG HIỆU Ở ĐÂY
+                  if (_futureThuongHieu != null)
+                    FutureBuilder<List<ThuongHieu>>(
+                      future: _futureThuongHieu,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return const SizedBox(); // Không có thương hiệu
+                        }
+
+                        final thuongHieus = snapshot.data!;
+                        return SizedBox(
+                          height: 48,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: thuongHieus.length,
+                            itemBuilder: (context, index) {
+                              final th = thuongHieus[index];
+                              final isSelected = th.id == _selectedThuongHieuId;
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                child: ChoiceChip(
+                                  label: Text(th.ten),
+                                  selected: isSelected,
+                                  onSelected: (_) {
+                                    setState(() {
+                                      _selectedThuongHieuId = th.id;
+                                      _futureSanPhamTheoDanhMuc =
+                                          SanPhamService.fetchByDanhMucAndThuongHieu(
+                                            _selectedDanhMucId!,
+                                            _selectedThuongHieuId!,
+                                          );
+                                    });
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                ],
               );
             },
           ),
-
-          // --- PHẦN THƯƠNG HIỆU THEO DANH MỤC ---
-          if (_futureThuongHieu != null)
-            FutureBuilder<List<ThuongHieu>>(
-              future: _futureThuongHieu,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const SizedBox();
-                }
-
-                final thuongHieus = snapshot.data!;
-                return SizedBox(
-                  height: 48,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: thuongHieus.length,
-                    itemBuilder: (context, index) {
-                      final th = thuongHieus[index];
-                      final isSelected = th.id == _selectedThuongHieuId;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: ChoiceChip(
-                          label: Text(th.ten),
-                          selected: isSelected,
-                          onSelected: (_) {
-                            setState(() {
-                              _selectedThuongHieuId = th.id;
-                              _futureSanPhamTheoDanhMuc =
-                                  SanPhamService.fetchByDanhMucAndThuongHieu(
-                                    _selectedDanhMucId!,
-                                    _selectedThuongHieuId!,
-                                  );
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
 
           const Divider(),
 
