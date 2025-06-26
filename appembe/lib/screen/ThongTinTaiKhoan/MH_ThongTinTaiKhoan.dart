@@ -1,4 +1,5 @@
 import 'package:appembe/screen/ThongTinTaiKhoan/SoBeYeu.dart';
+import 'package:appembe/screen/ThongTinTaiKhoan/ThemBeYeuScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:appembe/model/NguoiDungModel.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/SoDiaChi.dart';
@@ -146,7 +147,7 @@ class _MH_ThongTinTaiKhoanState extends State<MH_ThongTinTaiKhoan> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const SoBeYeuScreen(),
+                                  builder: (_) =>  SoBeYeuScreen(),
                                 ),
                               );
                               break;

@@ -322,6 +322,7 @@ CREATE TABLE HoSoBe (
     tenBe VARCHAR(100) NOT NULL,
     ngaySinh DATE,
     gioiTinh ENUM('Nam', 'Nữ'),
+    canNang INT,
     ghiChu TEXT,
     ngayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (nguoiDungId) REFERENCES NguoiDung(id)

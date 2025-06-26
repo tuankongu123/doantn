@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:appembe/widget/DinhVi.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -88,6 +89,30 @@ class _GoiYDiaChiState extends State<GoiYDiaChi> {
                       },
                     ),
                   ),
+            // ElevatedButton.icon(
+            //   onPressed: () async {
+            //     final diaChiBanDo = await Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (_) =>  DinhViTrenBanDo(),
+            //       ),
+            //     );
+            //     if (diaChiBanDo != null) {
+            //       Navigator.pop(context, diaChiBanDo);
+            //     }
+            //   },
+            //   icon: const Icon(Icons.map),
+            //   label: const Text("Chọn địa chỉ trên bản đồ"),
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.white,
+            //     foregroundColor: Colors.black,
+            //     elevation: 0,
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(12),
+            //       side: const BorderSide(color: Colors.grey),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
