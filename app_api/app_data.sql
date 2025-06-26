@@ -326,3 +326,11 @@ CREATE TABLE HoSoBe (
     ngayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (nguoiDungId) REFERENCES NguoiDung(id)
 );
+CREATE TABLE SanPhamKhuyenMai (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    khuyenMaiId INT,
+    sanPhamId INT,
+    giamGia DECIMAL(10,2), -- số tiền giảm, hoặc bạn có thể dùng phần trăm nếu thích
+    FOREIGN KEY (khuyenMaiId) REFERENCES KhuyenMai(id),
+    FOREIGN KEY (sanPhamId) REFERENCES SanPham(id)
+);
