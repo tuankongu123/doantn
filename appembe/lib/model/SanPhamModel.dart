@@ -3,6 +3,7 @@ class SanPham {
   final String ten;
   final double gia;
   final String hinhAnh;
+  final int soLuong;
   final String moTa;
   final String danhMuc;
   final String loai;
@@ -13,6 +14,7 @@ class SanPham {
     required this.ten,
     required this.gia,
     required this.hinhAnh,
+    required this.soLuong,
     required this.moTa,
     required this.danhMuc,
     required this.loai,
@@ -25,6 +27,7 @@ class SanPham {
       ten: json['ten'] ?? '',
       gia: double.tryParse(json['gia'].toString()) ?? 0.0,
       hinhAnh: json['hinhAnh'] ?? '',
+      soLuong: int.tryParse(json['soLuong'].toString()) ?? 0,
       moTa: json['moTa'] ?? '',
       danhMuc: json['danhMuc'] ?? '',
       loai: json['loai'] ?? '',

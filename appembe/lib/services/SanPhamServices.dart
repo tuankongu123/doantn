@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../model/SanPhamModel.dart';
 
 class SanPhamService {
+  static const String baseUrl = "http://10.0.2.2/app_api/SanPham/";
   static Future<List<SanPham>> fetchSanPham() async {
     final response = await http.get(
       Uri.parse("http://10.0.2.2/app_api/SanPham/get_sanpham.php"),
@@ -66,6 +67,16 @@ class SanPhamService {
       return jsonList.map((e) => SanPham.fromJson(e)).toList();
     } else {
       throw Exception('Không thể tải sản phẩm theo danh mục và thương hiệu');
+    }
+  }
+
+  static Future<void> xoa(int id) async {
+    final url = Uri.parse("${baseUrl}delete_sanpham.php?id=$id");
+
+    final response = await http.delete(url);
+
+    if (response.statusCode != 200) {
+      throw Exception("Xoá sản phẩm thất bại");
     }
   }
 }

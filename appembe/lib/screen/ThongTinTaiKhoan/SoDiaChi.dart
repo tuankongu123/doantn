@@ -1,10 +1,11 @@
-import 'package:appembe/screen/ThongTinTaiKhoan/SuaDiaChiScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:appembe/screen/ThongTinTaiKhoan/SuaDiaChiScreen.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/ThemDiaChi.dart';
 import 'package:appembe/services/DiaChiService.dart';
 
 class SoDiaChiScreen extends StatefulWidget {
-  const SoDiaChiScreen({super.key});
+  final bool isSelectMode; // Thêm tham số để xác định chế độ chọn địa chỉ
+  const SoDiaChiScreen({super.key, this.isSelectMode = false});
 
   @override
   State<SoDiaChiScreen> createState() => _SoDiaChiScreenState();
@@ -12,117 +13,215 @@ class SoDiaChiScreen extends StatefulWidget {
 
 class _SoDiaChiScreenState extends State<SoDiaChiScreen> {
   List<Map<String, dynamic>> diaChiList = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    loadDiaChi();
+    _loadDiaChi();
   }
 
-  Future<void> loadDiaChi() async {
+  Future<void> _loadDiaChi() async {
+    setState(() => isLoading = true);
     try {
-      final ds = await DiaChiService.getDiaChi(
-        1,
-      ); // 👈 ID người dùng mặc định là 1
-      setState(() {
-        diaChiList = ds;
-      });
+      final ds = await DiaChiService.getDiaChi(1); // ID người dùng
+      setState(() => diaChiList = ds);
     } catch (e) {
       print('Lỗi tải địa chỉ: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi tải địa chỉ: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Sổ Địa Chỉ"), centerTitle: true),
-      body: diaChiList.isEmpty
-          ? const Center(child: Text("Chưa có địa chỉ nào"))
-          : ListView.builder(
-              itemCount: diaChiList.length,
-              itemBuilder: (context, index) {
-                final dc = diaChiList[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  child: ListTile(
-                    leading: const Icon(Icons.location_on, color: Colors.pink),
-                    title: Text(
-                      "${dc['tenNguoiNhan']}  |  ${dc['soDienThoai']}",
-                    ),
-                    subtitle: Text(dc['diaChi']),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        dc['macDinh'] == true
-                            ? Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(color: Colors.pink),
-                                ),
-                                child: const Text(
-                                  "Địa chỉ mặc định",
-                                  style: TextStyle(
-                                    color: Colors.pink,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              )
-                            : const SizedBox(),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.grey),
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    SuaDiaChiScreen(diaChi: dc),
-                              ),
-                            );
-
-                            if (result == true) {
-                              await loadDiaChi();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+      appBar: AppBar(
+        title: const Text("Sổ Địa Chỉ"),
+        centerTitle: true,
+        actions: [
+          if (widget.isSelectMode)
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(context),
             ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(12),
+        ],
+      ),
+      body: _buildBody(),
+      bottomNavigationBar: widget.isSelectMode ? null : _buildAddButton(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (diaChiList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.location_off, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text("Chưa có địa chỉ nào"),
+            if (!widget.isSelectMode)
+              TextButton(onPressed: _loadDiaChi, child: const Text("Thử lại")),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadDiaChi,
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: diaChiList.length,
+        itemBuilder: (context, index) {
+          final dc = diaChiList[index];
+          return _buildDiaChiItem(dc);
+        },
+      ),
+    );
+  }
+
+  Widget _buildDiaChiItem(Map<String, dynamic> diaChi) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: InkWell(
+        onTap: widget.isSelectMode
+            ? () =>
+                  Navigator.pop(context, diaChi) // Trả về địa chỉ đã chọn
+            : null,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.location_on, color: Colors.pink, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    diaChi['tenNguoiNhan'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (diaChi['macDinh'] == true)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.pink.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.pink),
+                      ),
+                      child: const Text(
+                        "Mặc định",
+                        style: TextStyle(color: Colors.pink, fontSize: 12),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(diaChi['soDienThoai']),
+              const SizedBox(height: 4),
+              Text(diaChi['diaChi']),
+              if (!widget.isSelectMode) _buildActionButtons(diaChi),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(Map<String, dynamic> diaChi) {
+    return Column(
+      children: [
+        const Divider(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            OutlinedButton.icon(
+              icon: const Icon(Icons.edit, size: 16),
+              label: const Text("Sửa"),
+              onPressed: () => _suaDiaChi(diaChi),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.grey[700],
+                side: BorderSide(color: Colors.grey[300]!),
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (diaChi['macDinh'] != true)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.star, size: 16),
+                label: const Text("Đặt mặc định"),
+                onPressed: () => _datMacDinh(diaChi['id']),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink.withOpacity(0.1),
+                  foregroundColor: Colors.pink,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddButton() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: ElevatedButton.icon(
           onPressed: () async {
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ThemDiaChi()),
+              MaterialPageRoute(builder: (_) => const ThemDiaChi()),
             );
-
-            if (result == true) {
-              await loadDiaChi();
-            }
+            if (result == true) await _loadDiaChi();
           },
           icon: const Icon(Icons.add),
-          label: const Text(
-            "Thêm địa chỉ nhận hàng",
-            style: TextStyle(color: Colors.white),
-          ),
+          label: const Text("THÊM ĐỊA CHỈ MỚI"),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.pink,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(50),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _suaDiaChi(Map<String, dynamic> diaChi) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => SuaDiaChiScreen(diaChi: diaChi)),
+    );
+    if (result == true) await _loadDiaChi();
+  }
+
+  Future<void> _datMacDinh(int id) async {
+    try {
+      await DiaChiService.datMacDinh(id);
+      await _loadDiaChi();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đã đặt làm địa chỉ mặc định")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Lỗi: ${e.toString()}")));
+    }
   }
 }

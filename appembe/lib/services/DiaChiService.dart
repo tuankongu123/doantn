@@ -93,4 +93,20 @@ class DiaChiService {
       return false;
     }
   }
+
+  static Future<void> datMacDinh(int idDiaChi) async {
+    try {
+      // Gọi API để cập nhật địa chỉ mặc định
+      final response = await http.post(
+        Uri.parse('$_baseUrl/diachi/set-default'),
+        body: {'id': idDiaChi.toString()},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Lỗi khi đặt địa chỉ mặc định');
+      }
+    } catch (e) {
+      throw Exception('Lỗi kết nối: ${e.toString()}');
+    }
+  }
 }
