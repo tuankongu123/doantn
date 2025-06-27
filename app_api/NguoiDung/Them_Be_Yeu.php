@@ -1,6 +1,6 @@
 <?php
 ob_clean();
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: application/json');
 
 include_once(__DIR__ . '/../config/db.php');
 

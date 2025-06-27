@@ -323,7 +323,7 @@ CREATE TABLE HoSoBe (
     ngaySinh DATE,
     gioiTinh ENUM('Nam', 'Nữ'),
     canNang INT,
-    ghiChu TEXT,
+    ghiChu TEXT, 
     ngayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (nguoiDungId) REFERENCES NguoiDung(id)
 );

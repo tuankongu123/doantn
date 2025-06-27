@@ -79,4 +79,23 @@ class SanPhamService {
       throw Exception("Xoá sản phẩm thất bại");
     }
   }
+
+  static Future<List<SanPham>> fetchByKeyword(String keyword) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/timkiem_sanpham.php?keyword=$keyword"),
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      if (decoded['status'] == 'success') {
+        return (decoded['data'] as List)
+            .map((json) => SanPham.fromJson(json))
+            .toList();
+      } else {
+        throw Exception(decoded['message']);
+      }
+    } else {
+      throw Exception("Lỗi kết nối API");
+    }
+  }
 }
