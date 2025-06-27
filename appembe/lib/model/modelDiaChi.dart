@@ -1,41 +1,25 @@
-// import 'dart:convert';
+class SoDiaChi {
+  final int id;
+  final int nguoiDungId;
+  final String tenNguoiNhan;
+  final String soDienThoai;
+  final String diaChi;
 
-// class DiaChi {
-//   final String ten;
-//   final String soDienThoai;
-//   final String diaChi;
-//   final bool macDinh;
-//   final String loai;
+  SoDiaChi({
+    required this.id,
+    required this.nguoiDungId,
+    required this.tenNguoiNhan,
+    required this.soDienThoai,
+    required this.diaChi,
+  });
 
-//   DiaChi({
-//     required this.ten,
-//     required this.soDienThoai,
-//     required this.diaChi,
-//     required this.macDinh,
-//     required this.loai,
-//   });
-
-//   Map<String, dynamic> toMap() {
-//     return {
-//       'ten': ten,
-//       'soDienThoai': soDienThoai,
-//       'diaChi': diaChi,
-//       'macDinh': macDinh,
-//       'loai': loai,
-//     };
-//   }
-
-//   factory DiaChi.fromMap(Map<String, dynamic> map) {
-//     return DiaChi(
-//       ten: map['ten'],
-//       soDienThoai: map['soDienThoai'],
-//       diaChi: map['diaChi'],
-//       macDinh: map['macDinh'],
-//       loai: map['loai'],
-//     );
-//   }
-
-//   String toJson() => json.encode(toMap());
-
-//   factory DiaChi.fromJson(String source) => DiaChi.fromMap(json.decode(source));
-// }
+  factory SoDiaChi.fromJson(Map<String, dynamic> json) {
+    return SoDiaChi(
+      id: int.parse(json['id'].toString()),
+      nguoiDungId: int.parse(json['nguoiDungId'].toString()),
+      tenNguoiNhan: json['tenNguoiNhan'],
+      soDienThoai: json['soDienThoai'],
+      diaChi: json['diaChi'],
+    );
+  }
+}

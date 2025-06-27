@@ -72,9 +72,9 @@ class _GioHangScreenState extends State<GioHangScreen> {
         );
         await _taiGioHang();
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("❌ Xóa thất bại")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("❌ Xóa thất bại")),
+        );
       }
     }
   }
@@ -88,97 +88,104 @@ class _GioHangScreenState extends State<GioHangScreen> {
           : Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: gioHang.length,
-                    itemBuilder: (context, index) {
-                      final item = gioHang[index];
-                      return ListTile(
-                        leading: Image.asset(
-                          "assets/images/${item.hinhAnh}",
-                          width: 50,
+                  child: gioHang.isEmpty
+                      ? const Center(child: Text("Giỏ hàng trống"))
+                      : ListView.builder(
+                          itemCount: gioHang.length,
+                          itemBuilder: (context, index) {
+                            final item = gioHang[index];
+                            return ListTile(
+                              leading: Image.asset(
+                                "assets/images/${item.hinhAnh}",
+                                width: 50,
+                              ),
+                              title: Text(item.tenSanPham),
+                              subtitle: Text(
+                                "${item.gia.toStringAsFixed(0)}đ x ${item.soLuong}",
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () =>
+                                        _thayDoiSoLuong(index, -1),
+                                  ),
+                                  Text(item.soLuong.toString()),
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () =>
+                                        _thayDoiSoLuong(index, 1),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () => _xoaSanPham(item.id),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                        title: Text(item.tenSanPham),
-                        subtitle: Text(
-                          "${item.gia.toStringAsFixed(0)}đ x ${item.soLuong}",
+                ),
+                SafeArea(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 4,
+                          color: Colors.grey,
+                          offset: Offset(0, -2),
                         ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove),
-                              onPressed: () => _thayDoiSoLuong(index, -1),
+                            const Text(
+                              "Tổng tiền:",
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            Text(item.soLuong.toString()),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: () => _thayDoiSoLuong(index, 1),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
+                            Text(
+                              "${_tinhTongTien().toStringAsFixed(0)}đ",
+                              style: const TextStyle(
+                                fontSize: 16,
                                 color: Colors.red,
                               ),
-                              onPressed: () => _xoaSanPham(item.id),
                             ),
                           ],
                         ),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        blurRadius: 4,
-                        color: Colors.grey,
-                        offset: Offset(0, -2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Tổng tiền:",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            "${_tinhTongTien().toStringAsFixed(0)}đ",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => DatHangScreen(
-                                nguoiDungId: widget.nguoiDungId,
-                                gioHang: gioHang, // 👈 Truyền danh sách gốc
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => DatHangScreen(
+                                  nguoiDungId: widget.nguoiDungId,
+                                  gioHang: gioHang,
+                                ),
                               ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pink,
+                            minimumSize: const Size.fromHeight(45),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                          );
-                        },
-                        child: const Text("Tiến hành đặt hàng"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.pink,
-                          minimumSize: const Size.fromHeight(45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
                           ),
+                          child: const Text("Tiến hành đặt hàng"),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],

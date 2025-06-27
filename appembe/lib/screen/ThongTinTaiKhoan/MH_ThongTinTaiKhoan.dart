@@ -139,7 +139,7 @@ class _MH_ThongTinTaiKhoanState extends State<MH_ThongTinTaiKhoan> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const SoDiaChiScreen(),
+                                  builder: (_) =>  SoDiaChiScreen(nguoiDungId: 1),
                                 ),
                               );
                               break;
