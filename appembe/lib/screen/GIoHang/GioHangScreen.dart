@@ -14,6 +14,7 @@ class GioHangScreen extends StatefulWidget {
 class _GioHangScreenState extends State<GioHangScreen> {
   List<GioHangItem> gioHang = [];
   bool _isLoading = true;
+  Set<int> _sanPhamDuocChon = {};
 
   @override
   void initState() {
@@ -23,11 +24,16 @@ class _GioHangScreenState extends State<GioHangScreen> {
 
   Future<void> _taiGioHang() async {
     gioHang = await GioHangService.layGioHang(widget.nguoiDungId);
-    setState(() => _isLoading = false);
+    setState(() {
+      _isLoading = false;
+      _sanPhamDuocChon = gioHang.map((item) => item.id).toSet(); // mặc định chọn hết
+    });
   }
 
   double _tinhTongTien() {
-    return gioHang.fold(0, (sum, item) => sum + item.gia * item.soLuong);
+    return gioHang
+        .where((item) => _sanPhamDuocChon.contains(item.id))
+        .fold(0, (sum, item) => sum + item.gia * item.soLuong);
   }
 
   void _thayDoiSoLuong(int index, int thayDoi) async {
@@ -52,14 +58,8 @@ class _GioHangScreenState extends State<GioHangScreen> {
         title: const Text("Xóa sản phẩm"),
         content: const Text("Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?"),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Hủy"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Xóa"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Hủy")),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Xóa")),
         ],
       ),
     );
@@ -79,6 +79,8 @@ class _GioHangScreenState extends State<GioHangScreen> {
     }
   }
 
+  bool get _daChonHet => _sanPhamDuocChon.length == gioHang.length;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,37 +93,60 @@ class _GioHangScreenState extends State<GioHangScreen> {
                   child: gioHang.isEmpty
                       ? const Center(child: Text("Giỏ hàng trống"))
                       : ListView.builder(
-                          itemCount: gioHang.length,
+                          itemCount: gioHang.length + 1, // +1 để thêm dòng chọn tất cả
                           itemBuilder: (context, index) {
-                            final item = gioHang[index];
+                            if (index == 0) {
+                              return CheckboxListTile(
+                                value: _daChonHet,
+                                onChanged: (chonHet) {
+                                  setState(() {
+                                    if (chonHet == true) {
+                                      _sanPhamDuocChon = gioHang.map((item) => item.id).toSet();
+                                    } else {
+                                      _sanPhamDuocChon.clear();
+                                    }
+                                  });
+                                },
+                                title: const Text("Chọn tất cả sản phẩm"),
+                                controlAffinity: ListTileControlAffinity.leading,
+                              );
+                            }
+
+                            final item = gioHang[index - 1];
                             return ListTile(
-                              leading: Image.asset(
-                                "assets/images/${item.hinhAnh}",
-                                width: 50,
+                              leading: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (_sanPhamDuocChon.contains(item.id)) {
+                                      _sanPhamDuocChon.remove(item.id);
+                                    } else {
+                                      _sanPhamDuocChon.add(item.id);
+                                    }
+                                  });
+                                },
+                                child: Icon(
+                                  _sanPhamDuocChon.contains(item.id)
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_unchecked,
+                                  color: Colors.green,
+                                ),
                               ),
                               title: Text(item.tenSanPham),
-                              subtitle: Text(
-                                "${item.gia.toStringAsFixed(0)}đ x ${item.soLuong}",
-                              ),
+                              subtitle: Text("${item.gia.toStringAsFixed(0)}đ x ${item.soLuong}"),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.remove),
-                                    onPressed: () =>
-                                        _thayDoiSoLuong(index, -1),
+                                    onPressed: () => _thayDoiSoLuong(index - 1, -1),
                                   ),
                                   Text(item.soLuong.toString()),
                                   IconButton(
                                     icon: const Icon(Icons.add),
-                                    onPressed: () =>
-                                        _thayDoiSoLuong(index, 1),
+                                    onPressed: () => _thayDoiSoLuong(index - 1, 1),
                                   ),
                                   IconButton(
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      color: Colors.red,
-                                    ),
+                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
                                     onPressed: () => _xoaSanPham(item.id),
                                   ),
                                 ],
@@ -136,11 +161,7 @@ class _GioHangScreenState extends State<GioHangScreen> {
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
-                        BoxShadow(
-                          blurRadius: 4,
-                          color: Colors.grey,
-                          offset: Offset(0, -2),
-                        ),
+                        BoxShadow(blurRadius: 4, color: Colors.grey, offset: Offset(0, -2)),
                       ],
                     ),
                     child: Column(
@@ -149,28 +170,33 @@ class _GioHangScreenState extends State<GioHangScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              "Tổng tiền:",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
+                            const Text("Tổng tiền:", style: TextStyle(fontWeight: FontWeight.bold)),
                             Text(
                               "${_tinhTongTien().toStringAsFixed(0)}đ",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.red,
-                              ),
+                              style: const TextStyle(fontSize: 16, color: Colors.red),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         ElevatedButton(
                           onPressed: () {
+                            final gioHangChon = gioHang
+                                .where((item) => _sanPhamDuocChon.contains(item.id))
+                                .toList();
+
+                            if (gioHangChon.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("❗ Vui lòng chọn ít nhất 1 sản phẩm")),
+                              );
+                              return;
+                            }
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => DatHangScreen(
                                   nguoiDungId: widget.nguoiDungId,
-                                  gioHang: gioHang,
+                                  gioHang: gioHangChon,
                                 ),
                               ),
                             );

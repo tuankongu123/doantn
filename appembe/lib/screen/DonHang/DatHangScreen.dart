@@ -5,6 +5,7 @@ import 'package:appembe/services/GioHangServices.dart';
 import 'package:appembe/model/GioHangModel.dart';
 import 'package:appembe/model/SoDiaChiModel.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/SoDiaChi.dart';
+import 'dart:convert';
 
 class DatHangScreen extends StatefulWidget {
   final int nguoiDungId;
@@ -56,35 +57,41 @@ class _DatHangScreenState extends State<DatHangScreen> {
   void _datHang() async {
     if (diaChiMacDinh == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Vui lòng chọn địa chỉ giao hàng")),
+        const SnackBar(content: Text("❌ Vui lòng chọn địa chỉ giao hàng")),
       );
       return;
     }
 
     final danhSachMap = widget.gioHang.map((e) => e.toOrderJson()).toList();
 
-    final diaChiChiTiet = {
-      "tenNguoiNhan": diaChiMacDinh!.tenNguoiNhan,
-      "soDienThoai": diaChiMacDinh!.soDienThoai,
-      "diaChi": diaChiMacDinh!.diaChi,
-    };
-
     final response = await DonHangServices.taoDonHang(
       danhSachSanPham: danhSachMap,
       tongTien: _tongThanhToan,
       phuongThucTt: _phuongThucThanhToan,
       diaChiId: diaChiMacDinh!.id,
-      diaChiChiTiet: diaChiChiTiet,
+      diaChiChiTiet: {
+        "tenNguoiNhan": diaChiMacDinh!.tenNguoiNhan,
+        "soDienThoai": diaChiMacDinh!.soDienThoai,
+        "diaChi": diaChiMacDinh!.diaChi,
+      },
     );
 
     if (response.statusCode == 200) {
-      await GioHangService.xoaGioHangTheoNguoiDung(widget.nguoiDungId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Đặt hàng thành công")));
-      Navigator.popUntil(context, ModalRoute.withName("/"));
+      final data = jsonDecode(response.body);
+      if (data['success'] == true) {
+        await GioHangService.xoaGioHangTheoNguoiDung(widget.nguoiDungId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("✅ Đặt hàng thành công")),
+        );
+        Navigator.popUntil(context, ModalRoute.withName("/"));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Lỗi: ${data['error']}")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Đặt hàng thất bại: ${response.body}")),
+        const SnackBar(content: Text("❌ Kết nối server thất bại")),
       );
     }
   }
@@ -165,10 +172,7 @@ class _DatHangScreenState extends State<DatHangScreen> {
     children: [
       const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Text(
-          "Phương thức thanh toán",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        child: Text("Phương thức thanh toán", style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       RadioListTile<String>(
         title: const Text("Thanh toán khi nhận hàng"),

@@ -7,7 +7,7 @@ class DonHangServices {
     required double tongTien,
     required String phuongThucTt,
     required int diaChiId,
-    required Map<String, dynamic> diaChiChiTiet, // ✅ Địa chỉ chi tiết
+    required Map<String, dynamic> diaChiChiTiet, // ✅ địa chỉ chi tiết
   }) async {
     final url = Uri.parse('http://10.0.2.2/app_api/DonHang/tao_don_hang.php');
 
@@ -20,8 +20,8 @@ class DonHangServices {
     });
 
     print("========== GỬI ĐƠN HÀNG ==========");
-    print("➡ URL: \$url");
-    print("➡ BODY: \$body");
+    print("➡ URL: $url");
+    print("➡ BODY: $body");
 
     final response = await http.post(
       url,
@@ -29,8 +29,8 @@ class DonHangServices {
       body: body,
     );
 
-    print("⬅ STATUS: \${response.statusCode}");
-    print("⬅ BODY: \${response.body}");
+    print("⬅ STATUS: ${response.statusCode}");
+    print("⬅ BODY: ${response.body}");
 
     return response;
   }
