@@ -5,15 +5,20 @@ header('Content-Type: application/json');
 try {
     $donHangId = $_GET['id'] ?? 0;
 
-    $stmt = $pdo->prepare("
+    $stmt = $conn->prepare("
         SELECT sp.ten AS tenSanPham, ct.soLuong, ct.gia 
         FROM ChiTietDonHang ct
         JOIN SanPham sp ON sp.id = ct.sanPhamId
-        WHERE ct.donHangId = :donHangId
+        WHERE ct.donHangId = ?
     ");
-    $stmt->bindParam(':donHangId', $donHangId, PDO::PARAM_INT);
+    $stmt->bind_param("i", $donHangId);
     $stmt->execute();
-    $chiTiet = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $result = $stmt->get_result();
+    $chiTiet = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $chiTiet[] = $row;
+    }
 
     echo json_encode(['status' => 'success', 'data' => $chiTiet]);
 } catch (Exception $e) {

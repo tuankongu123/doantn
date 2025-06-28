@@ -55,28 +55,28 @@ class DiaChiService {
     }
   }
 
-  static Future<bool> _capNhatDiaChi({
-    required int id,
-    required String tenNguoiNhan,
-    required String soDienThoai,
-    required String diaChi,
-  }) async {
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2/app_api/DiaChi/Them_Dia_Chi.php'),
-      body: {
-        'id': id.toString(),
-        'tenNguoiNhan': tenNguoiNhan,
-        'soDienThoai': soDienThoai,
-        'diaChi': diaChi,
-      },
-    );
+  // static Future<bool> _capNhatDiaChi({
+  //   required int id,
+  //   required String tenNguoiNhan,
+  //   required String soDienThoai,
+  //   required String diaChi,
+  // }) async {
+  //   final response = await http.post(
+  //     Uri.parse('http://10.0.2.2/app_api/DiaChi/Them_Dia_Chi.php'),
+  //     body: {
+  //       'id': id.toString(),
+  //       'tenNguoiNhan': tenNguoiNhan,
+  //       'soDienThoai': soDienThoai,
+  //       'diaChi': diaChi,
+  //     },
+  //   );
 
-    if (response.statusCode == 200) {
-      return response.body == 'thanh_cong';
-    } else {
-      return false;
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     return response.body == 'thanh_cong';
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
   static Future<bool> xoaDiaChi(String id) async {
     try {
@@ -109,4 +109,21 @@ class DiaChiService {
       throw Exception('Lỗi kết nối: ${e.toString()}');
     }
   }
+  static Future<List<Map<String, dynamic>>> layDanhSachDiaChi() async {
+  final url = Uri.parse("$_baseUrl/LayTatCa_Dia_Chi.php");
+
+  try {
+    final response = await http.get(url);
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200 && data['success'] == true) {
+      return List<Map<String, dynamic>>.from(data['data']);
+    } else {
+      throw Exception(data['error'] ?? 'Lỗi lấy danh sách địa chỉ');
+    }
+  } catch (e) {
+    print("❌ Lỗi khi lấy danh sách địa chỉ: $e");
+    rethrow;
+  }
+}
 }

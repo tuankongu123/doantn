@@ -43,22 +43,26 @@ class DonHangService {
 
   static Future<List<ChiTietDonHang>> fetchChiTiet(int donHangId) async {
     final url = Uri.parse(
-      "http://10.0.2.2/app_api/Admin/donhang_chitiet.php?donHangId=$donHangId",
+      "http://localhost/app_api/Admin/donhang_chitiet.php?id=$donHangId",
     );
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return List<ChiTietDonHang>.from(
-        data.map((e) => ChiTietDonHang.fromJson(e)),
-      );
+      final decoded = jsonDecode(response.body);
+
+      if (decoded['status'] == 'success') {
+        final List<dynamic> data = decoded['data'];
+        return data.map((e) => ChiTietDonHang.fromJson(e)).toList();
+      } else {
+        throw Exception("Lỗi từ API: ${decoded['message']}");
+      }
     } else {
-      throw Exception("Lỗi khi tải chi tiết đơn hàng");
+      throw Exception("Lỗi kết nối máy chủ: ${response.statusCode}");
     }
   }
 
   static Future<bool> duyetDon(int id) async {
-    final url = Uri.parse("http://10.0.2.2/app_api/Admin/duyet_don.php");
+    final url = Uri.parse("http://localhost/app_api/Admin/duyet_don.php");
     final response = await http.post(url, body: {"id": id.toString()});
 
     final result = jsonDecode(response.body);

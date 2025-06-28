@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/SuaDiaChiScreen.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/ThemDiaChi.dart';
 import 'package:appembe/services/DiaChiService.dart';
+import 'package:appembe/model/SoDiaChiModel.dart';
 
 class SoDiaChiScreen extends StatefulWidget {
-  final bool isSelectMode; // Thêm tham số để xác định chế độ chọn địa chỉ
-  const SoDiaChiScreen({super.key, this.isSelectMode = false});
+  final bool isSelectMode;
+  final int nguoiDungId;
+
+  const SoDiaChiScreen({
+    super.key,
+    required this.nguoiDungId,
+    this.isSelectMode = false,
+  });
 
   @override
   State<SoDiaChiScreen> createState() => _SoDiaChiScreenState();
@@ -24,7 +31,7 @@ class _SoDiaChiScreenState extends State<SoDiaChiScreen> {
   Future<void> _loadDiaChi() async {
     setState(() => isLoading = true);
     try {
-      final ds = await DiaChiService.getDiaChi(1); // ID người dùng
+      final ds = await DiaChiService.getDiaChi(widget.nguoiDungId);
       setState(() => diaChiList = ds);
     } catch (e) {
       print('Lỗi tải địa chỉ: $e');
@@ -93,8 +100,16 @@ class _SoDiaChiScreenState extends State<SoDiaChiScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: InkWell(
         onTap: widget.isSelectMode
-            ? () =>
-                  Navigator.pop(context, diaChi) // Trả về địa chỉ đã chọn
+            ? () {
+                final diaChiObj = SoDiaChi(
+                  id: diaChi['id'],
+                  nguoiDungId: diaChi['nguoiDungId'],
+                  tenNguoiNhan: diaChi['tenNguoiNhan'],
+                  soDienThoai: diaChi['soDienThoai'],
+                  diaChi: diaChi['diaChi'],
+                );
+                Navigator.pop(context, diaChiObj);
+              }
             : null,
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -219,9 +234,9 @@ class _SoDiaChiScreenState extends State<SoDiaChiScreen> {
         const SnackBar(content: Text("Đã đặt làm địa chỉ mặc định")),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Lỗi: ${e.toString()}")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Lỗi: ${e.toString()}")),
+      );
     }
   }
 }

@@ -1,22 +1,22 @@
 <?php
-require_once '../config/db.php';
-header('Content-Type: application/json');
+include("../config/db.php");
+header("Content-Type: application/json");
 
-try {
-    $data = json_decode(file_get_contents("php://input"), true);
-    $donHangId = $data['id'] ?? 0;
+if (!isset($_POST['id'])) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => 'Thiếu ID đơn hàng']);
+    exit;
+}
 
-    if (!$donHangId) {
-        echo json_encode(['status' => 'error', 'message' => 'Thiếu ID đơn hàng']);
-        exit;
-    }
+$id = intval($_POST['id']);
+$sql = "UPDATE DonHang SET trangThai = 'da_duyet' WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id);
 
-    $stmt = $pdo->prepare("UPDATE DonHang SET trangThai = 'da_duyet' WHERE id = :id");
-    $stmt->bindParam(':id', $donHangId, PDO::PARAM_INT);
-    $stmt->execute();
-
-    echo json_encode(['status' => 'success', 'message' => 'Đã duyệt đơn']);
-} catch (Exception $e) {
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+if ($stmt->execute()) {
+    echo json_encode(['status' => 'success', 'message' => 'Đơn hàng đã được duyệt']);
+} else {
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Lỗi khi duyệt đơn']);
 }
 ?>

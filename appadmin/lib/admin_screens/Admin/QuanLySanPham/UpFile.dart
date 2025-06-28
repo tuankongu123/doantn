@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 enum LoaiUpload { sanPham, loaiSanPham, voucher, khuyenMai }
 
@@ -32,12 +34,11 @@ class _UploadExcelScreenState extends State<UploadExcelScreen> {
         allowedExtensions: ['xlsx', 'xls'],
       );
 
-      if (result != null && result.files.single.path != null) {
-        File file = File(result.files.single.path!);
+      if (result != null) {
         setState(() {
           _tenFile = result.files.single.name;
         });
-        await _uploadFile(file);
+        await _uploadFile(result.files.single);
       } else {
         _showSnackBar("Không chọn file nào");
       }
@@ -46,7 +47,7 @@ class _UploadExcelScreenState extends State<UploadExcelScreen> {
     }
   }
 
-  Future<void> _uploadFile(File file) async {
+  Future<void> _uploadFile(PlatformFile file) async {
     setState(() {
       _dangUpload = true;
       _loiDong = [];
@@ -55,11 +56,24 @@ class _UploadExcelScreenState extends State<UploadExcelScreen> {
     try {
       final loaiStr = _loaiDangChon.name;
       final uri = Uri.parse(
-        'http://10.0.2.2/app_api/SanPham/upload_excel.php?type=$loaiStr',
+        'http://localhost/app_api/SanPham/upload_excel.php?type=$loaiStr',
       );
 
       var request = http.MultipartRequest('POST', uri);
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+
+      if (kIsWeb) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            file.bytes!,
+            filename: file.name,
+          ),
+        );
+      } else {
+        request.files.add(
+          await http.MultipartFile.fromPath('file', file.path!),
+        );
+      }
 
       var response = await request.send();
       final responseData = await response.stream.bytesToString();
@@ -101,6 +115,18 @@ class _UploadExcelScreenState extends State<UploadExcelScreen> {
             {'dong': '?', 'loi': jsonResult['message'] ?? 'Lỗi không xác định'},
           ];
     });
+  }
+
+  void _taiFileMau() async {
+    final loaiStr = _loaiDangChon.name;
+    final url =
+        'http://localhost/app_api/SanPham/download_template.php?type=$loaiStr';
+
+    final uri = Uri.parse(url);
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      _showSnackBar("Không thể mở liên kết tải file mẫu.");
+    }
   }
 
   void _showSnackBar(String message, {bool isError = true}) {
@@ -175,6 +201,16 @@ class _UploadExcelScreenState extends State<UploadExcelScreen> {
               label: const Text("Chọn file Excel"),
               onPressed: _dangUpload ? null : _chonVaTaiLenFile,
               style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.download),
+              label: const Text("Tải file mẫu"),
+              onPressed: _dangUpload ? null : _taiFileMau,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),

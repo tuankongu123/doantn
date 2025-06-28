@@ -1,3 +1,4 @@
+import 'package:appembe/screen/ThongTinTaiKhoan/DanhSachDonHangScreen.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/SoBeYeu.dart';
 import 'package:appembe/screen/ThongTinTaiKhoan/ThemBeYeuScreen.dart';
 import 'package:flutter/material.dart';
@@ -134,12 +135,23 @@ class _MH_ThongTinTaiKhoanState extends State<MH_ThongTinTaiKhoan> {
                                 ),
                               );
                               break;
+                            case 'Quản lý đơn hàng':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => DanhSachDonHang(
+                                    nguoiDungId: _nguoiDung!.id!,
+                                  ), // truyền ID người dùng
+                                ),
+                              );
+                              break;
 
                             case 'Sổ địa chỉ':
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const SoDiaChiScreen(),
+                                  builder: (_) =>
+                                      SoDiaChiScreen(nguoiDungId: 1),
                                 ),
                               );
                               break;
@@ -147,7 +159,7 @@ class _MH_ThongTinTaiKhoanState extends State<MH_ThongTinTaiKhoan> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>  SoBeYeuScreen(),
+                                  builder: (_) => SoBeYeuScreen(),
                                 ),
                               );
                               break;

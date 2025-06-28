@@ -3,6 +3,7 @@ import 'package:appadmin/admin_screens/Admin/QuanLySanPham.dart';
 import 'package:appadmin/admin_services/thongke_service.dart';
 import 'package:appadmin/models/thongke_model.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -25,7 +26,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
     double maxWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Dashboard Quản trị")),
+      backgroundColor: const Color(0xFFF2F4F8),
+      appBar: AppBar(
+        title: Text(
+          "QUẢN LÝ APP",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -34,9 +44,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Tổng quan",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 FutureBuilder<ThongKeResponse>(
@@ -45,7 +58,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Text('Lỗi: ${snapshot.error}');
+                      return Text('Lỗi: \${snapshot.error}');
                     } else if (!snapshot.hasData) {
                       return const Text('Không có dữ liệu');
                     }
@@ -85,51 +98,49 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   },
                 ),
                 const SizedBox(height: 40),
-                const Text(
+                Text(
                   "Chức năng quản trị",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 16),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.inventory),
-                    title: const Text("Quản lý sản phẩm"),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const Admin_QuanLySanPhamScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                _AdminMenuCard(
+                  title: "Quản lý sản phẩm",
+                  icon: Icons.inventory,
+                  color: Colors.indigo,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Admin_QuanLySanPhamScreen(),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 8),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.receipt_long),
-                    title: const Text("Quản lý đơn hàng"),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const QuanLyDonHangScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                const SizedBox(height: 12),
+                _AdminMenuCard(
+                  title: "Quản lý đơn hàng",
+                  icon: Icons.receipt_long,
+                  color: Colors.teal,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const QuanLyDonHangScreen(),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 8),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.people),
-                    title: const Text("Quản lý người dùng"),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
-                  ),
+                const SizedBox(height: 12),
+                _AdminMenuCard(
+                  title: "Quản lý người dùng",
+                  icon: Icons.people,
+                  color: Colors.deepPurple,
+                  onTap: () {
+                    // Thêm khi cần
+                  },
                 ),
               ],
             ),
@@ -159,26 +170,70 @@ class _DashboardCard extends StatelessWidget {
       width: 220,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 3,
+        elevation: 4,
+        shadowColor: color.withOpacity(0.3),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: color, size: 32),
-              const SizedBox(height: 12),
+              CircleAvatar(
+                backgroundColor: color.withOpacity(0.1),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(height: 16),
               Text(
                 value,
-                style: const TextStyle(
+                style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(title, style: const TextStyle(fontSize: 14)),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AdminMenuCard extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _AdminMenuCard({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withOpacity(0.1),
+          child: Icon(icon, color: color),
+        ),
+        title: Text(
+          title,
+          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

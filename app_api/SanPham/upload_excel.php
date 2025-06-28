@@ -1,9 +1,13 @@
 <?php
-require '../../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 include("../config/db.php");
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
+// CORS headers
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -44,11 +48,11 @@ try {
     $successCount = 0;
     $totalRows = count($rows);
 
-    // Lấy tên file upload để phân biệt api
-    $targetTable = $_GET['type'] ?? 'sanpham';
+    $targetTable = strtolower($_GET['type'] ?? 'sanpham');
 
     for ($i = 1; $i < $totalRows; $i++) {
         $row = $rows[$i];
+        $stmt = null;
 
         if ($targetTable === 'sanpham') {
             $ten = trim($row[0] ?? '');
@@ -72,7 +76,7 @@ try {
 
             $stmt = $conn->prepare("INSERT INTO SanPham (ten, gia, soLuong, moTa, hinhAnh, danhMucId, loaiId, thuongHieuId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("sdissiii", $ten, $gia, $soLuong, $moTa, $hinhAnh, $danhMucId, $loaiId, $thuongHieuId);
-        }
+        } 
         elseif ($targetTable === 'loaisanpham') {
             $danhMucId = intval($row[0] ?? 0);
             $ten = trim($row[1] ?? '');
@@ -84,7 +88,7 @@ try {
 
             $stmt = $conn->prepare("INSERT INTO LoaiSanPham (danhMucId, ten) VALUES (?, ?)");
             $stmt->bind_param("is", $danhMucId, $ten);
-        }
+        } 
         elseif ($targetTable === 'voucher') {
             $ma = trim($row[0] ?? '');
             $giaTri = floatval($row[1] ?? 0);
@@ -98,7 +102,7 @@ try {
 
             $stmt = $conn->prepare("INSERT INTO Voucher (ma, giaTri, hanSuDung, gioiHan) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("sdsi", $ma, $giaTri, $han, $gioiHan);
-        }
+        } 
         elseif ($targetTable === 'khuyenmai') {
             $ten = trim($row[0] ?? '');
             $moTa = trim($row[1] ?? '');
@@ -112,6 +116,15 @@ try {
 
             $stmt = $conn->prepare("INSERT INTO KhuyenMai (ten, moTa, ngayBatDau, ngayKetThuc) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("ssss", $ten, $moTa, $ngayBatDau, $ngayKetThuc);
+        } 
+        else {
+            $errors[] = ['dong' => $i + 1, 'loi' => "Loại dữ liệu không hợp lệ: $targetTable", 'du_lieu' => $row];
+            continue;
+        }
+
+        if (!isset($stmt)) {
+            $errors[] = ['dong' => $i + 1, 'loi' => "Không thể chuẩn bị câu lệnh SQL cho $targetTable", 'du_lieu' => $row];
+            continue;
         }
 
         if (!$stmt->execute()) {
@@ -147,4 +160,3 @@ try {
         'message' => 'Lỗi server: ' . $e->getMessage()
     ]);
 }
-?>
