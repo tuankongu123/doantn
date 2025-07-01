@@ -81,9 +81,11 @@ class SanPhamService {
   }
 
   static Future<List<SanPham>> fetchByKeyword(String keyword) async {
-    final response = await http.get(
-      Uri.parse("$baseUrl/timkiem_sanpham.php?keyword=$keyword"),
+    final url = Uri.parse(
+      "$baseUrl/timkiem_sanpham.php?keyword=${Uri.encodeComponent(keyword)}",
     );
+
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(response.body);

@@ -83,12 +83,12 @@ try {
         if (!$stmt->execute()) throw new Exception("Lỗi khi thêm chi tiết đơn hàng: " . $stmt->error);
         $stmt->close();
 
-        // Trừ tồn kho
-        $stmt = $conn->prepare("UPDATE sanpham SET soLuong = soLuong - ? WHERE id = ?");
-        if (!$stmt) throw new Exception("Lỗi prepare UPDATE tồn kho: " . $conn->error);
-        $stmt->bind_param("ii", $soLuongMua, $sanPhamId);
-        if (!$stmt->execute()) throw new Exception("Lỗi cập nhật tồn kho: " . $stmt->error);
-        $stmt->close();
+        // // Trừ tồn kho
+        // $stmt = $conn->prepare("UPDATE sanpham SET soLuong = soLuong - ? WHERE id = ?");
+        // if (!$stmt) throw new Exception("Lỗi prepare UPDATE tồn kho: " . $conn->error);
+        // $stmt->bind_param("ii", $soLuongMua, $sanPhamId);
+        // if (!$stmt->execute()) throw new Exception("Lỗi cập nhật tồn kho: " . $stmt->error);
+        // $stmt->close();
     }
 
     // Hoàn tất giao dịch

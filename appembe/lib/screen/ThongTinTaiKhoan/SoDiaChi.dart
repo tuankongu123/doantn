@@ -50,11 +50,23 @@ class _SoDiaChiScreenState extends State<SoDiaChiScreen> {
         title: const Text("Sổ Địa Chỉ"),
         centerTitle: true,
         actions: [
-          if (widget.isSelectMode)
+          if (widget.isSelectMode) ...[
+            IconButton(
+              icon: const Icon(Icons.add_location_alt),
+              tooltip: "Thêm địa chỉ mới",
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ThemDiaChi()),
+                );
+                if (result == true) await _loadDiaChi();
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.close),
               onPressed: () => Navigator.pop(context),
             ),
+          ]
         ],
       ),
       body: _buildBody(),
@@ -147,9 +159,9 @@ class _SoDiaChiScreenState extends State<SoDiaChiScreen> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(diaChi['soDienThoai']),
+              Text(diaChi['soDienThoai'] ?? ''),
               const SizedBox(height: 4),
-              Text(diaChi['diaChi']),
+              Text(diaChi['diaChi'] ?? ''),
               if (!widget.isSelectMode) _buildActionButtons(diaChi),
             ],
           ),
@@ -204,7 +216,7 @@ class _SoDiaChiScreenState extends State<SoDiaChiScreen> {
             if (result == true) await _loadDiaChi();
           },
           icon: const Icon(Icons.add),
-          label: const Text("THÊM ĐỊA CHỈ MỚI"),
+          label: const Text("THÊM ĐỊA CHỊ MỚI"),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.pink,
             foregroundColor: Colors.white,

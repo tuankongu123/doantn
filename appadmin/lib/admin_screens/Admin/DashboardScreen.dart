@@ -1,5 +1,7 @@
 import 'package:appadmin/admin_screens/Admin/QuanLyDonHangScreen.dart';
+import 'package:appadmin/admin_screens/Admin/QuanLyNguoiDungScreen.dart';
 import 'package:appadmin/admin_screens/Admin/QuanLySanPham.dart';
+import 'package:appadmin/admin_screens/Admin/ThongKeScreen.dart';
 import 'package:appadmin/admin_services/thongke_service.dart';
 import 'package:appadmin/models/thongke_model.dart';
 import 'package:flutter/material.dart';
@@ -139,7 +141,27 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   icon: Icons.people,
                   color: Colors.deepPurple,
                   onTap: () {
-                    // Thêm khi cần
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const AdminQuanLyNguoiDungScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                _AdminMenuCard(
+                  title: "Thống kê & Báo cáo",
+                  icon: Icons.bar_chart,
+                  color: Colors.deepOrange,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ThongKeScreen(),
+                      ),
+                    );
                   },
                 ),
               ],

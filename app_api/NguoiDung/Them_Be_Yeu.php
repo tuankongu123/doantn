@@ -1,32 +1,47 @@
 <?php
-ob_clean();
 header('Content-Type: application/json');
-
 include_once(__DIR__ . '/../config/db.php');
 
-$data = json_decode(file_get_contents("php://input"), true);
-$action = $data['action'] ?? null;
+// Đọc JSON đầu vào và log lại
+$raw = file_get_contents("php://input");
+file_put_contents("log.txt", $raw);
 
+$data = json_decode($raw, true);
+
+// Kiểm tra dữ liệu JSON
+if (!$data || !is_array($data)) {
+    echo json_encode([
+        'success' => false,
+        'error' => 'Dữ liệu JSON không hợp lệ',
+        'raw' => $raw
+    ]);
+    exit;
+}
+
+// Lấy action
+$action = $data['action'] ?? null;
 if (!$action) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Thiếu tham số action']);
     exit;
 }
 
+// XỬ LÝ: THÊM BÉ YÊU
 if ($action === 'them') {
-    $nguoiDungId = $data['nguoiDungId'] ?? null;
+    // Cho phép mặc định test với nguoiDungId = 1
+    $nguoiDungId = $data['nguoiDungId'] ?? 1;
     $tenBe = $data['tenBe'] ?? '';
     $ngaySinh = $data['ngaySinh'] ?? '';
     $gioiTinh = $data['gioiTinh'] ?? '';
     $canNang = $data['canNang'] ?? null;
 
-    if (!$nguoiDungId || !$tenBe || !$ngaySinh || !$gioiTinh || !$canNang) {
+    if (!$tenBe || !$ngaySinh || !$gioiTinh || !$canNang) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'Dữ liệu không hợp lệ']);
         exit;
     }
 
-    $sql = "INSERT INTO HoSoBe (nguoiDungId, tenBe, ngaySinh, gioiTinh, canNang ) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO HoSoBe (nguoiDungId, tenBe, ngaySinh, gioiTinh, canNang) VALUES (?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         http_response_code(500);
@@ -34,7 +49,7 @@ if ($action === 'them') {
         exit;
     }
 
-    $stmt->bind_param("isssis", $nguoiDungId, $tenBe, $ngaySinh, $gioiTinh, $canNang);
+    $stmt->bind_param("isssi", $nguoiDungId, $tenBe, $ngaySinh, $gioiTinh, $canNang);
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
     } else {
@@ -42,7 +57,10 @@ if ($action === 'them') {
         echo json_encode(['success' => false, 'error' => 'Lỗi thêm bé: ' . $stmt->error]);
     }
 
-} elseif ($action === 'sua') {
+}
+
+// XỬ LÝ: CẬP NHẬT BÉ YÊU
+elseif ($action === 'sua') {
     $id = $data['id'] ?? null;
     $tenBe = $data['tenBe'] ?? '';
     $ngaySinh = $data['ngaySinh'] ?? '';
@@ -63,15 +81,17 @@ if ($action === 'them') {
         exit;
     }
 
-    $stmt->bind_param("sssisi", $tenBe, $ngaySinh, $gioiTinh, $canNang, $id);
+    $stmt->bind_param("sssii", $tenBe, $ngaySinh, $gioiTinh, $canNang, $id);
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
     } else {
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => 'Lỗi cập nhật: ' . $stmt->error]);
     }
+}
 
-} elseif ($action === 'xoa') {
+// XỬ LÝ: XÓA BÉ YÊU
+elseif ($action === 'xoa') {
     $id = $data['id'] ?? null;
     if (!$id) {
         http_response_code(400);

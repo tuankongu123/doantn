@@ -1,18 +1,13 @@
-import 'package:appadmin/admin_screens/ChiTietSanPham/ChiTietSanPham.dart';
-import 'package:appadmin/models/ThuongHieuModel.dart';
-import 'package:appadmin/admin_screens/Admin/QuanLySanPham/NhapKho.dart';
-import 'package:appadmin/admin_screens/Admin/QuanLySanPham/SuaSanPham.dart';
-import 'package:appadmin/admin_screens/Admin/QuanLySanPham/ThemSanPham.dart';
-import 'package:appadmin/admin_screens/Admin/QuanLySanPham/TonKho.dart';
 import 'package:appadmin/admin_screens/Admin/QuanLySanPham/UpFile.dart';
-import 'package:appadmin/admin_services/ThuongHieuServices.dart';
-import 'package:appadmin/widget/DanhMucWidget.dart';
-import 'package:appadmin/widget/ThanhTimKiem.dart';
+import 'package:appadmin/admin_screens/ChiTietSanPham/ChiTietSanPham.dart';
 import 'package:flutter/material.dart';
-import '../../../models/DanhMucModel.dart';
-import '../../../models/SanPhamModel.dart';
-import '../../../admin_services/DanhMucServices.dart';
-import '../../../admin_services/SanPhamServices.dart';
+import 'package:appadmin/models/SanPhamModel.dart';
+import 'package:appadmin/models/DanhMucModel.dart';
+import 'package:appadmin/models/ThuongHieuModel.dart';
+import 'package:appadmin/admin_services/SanPhamServices.dart';
+import 'package:appadmin/admin_services/DanhMucServices.dart';
+import 'package:appadmin/admin_services/ThuongHieuServices.dart';
+import 'package:appadmin/widget/ThanhTimKiem.dart';
 
 class Admin_QuanLySanPhamScreen extends StatefulWidget {
   const Admin_QuanLySanPhamScreen({super.key});
@@ -25,11 +20,13 @@ class Admin_QuanLySanPhamScreen extends StatefulWidget {
 class _Admin_QuanLySanPhamScreenState extends State<Admin_QuanLySanPhamScreen> {
   late Future<List<DanhMuc>> _futureDanhMuc;
   int? _selectedDanhMucId;
-  String? _selectedDanhMucTen;
+  int? _selectedThuongHieuId;
   Future<List<SanPham>>? _futureSanPham;
   Future<List<ThuongHieu>>? _futureThuongHieu;
-  int? _selectedThuongHieuId;
+
   final TextEditingController _searchController = TextEditingController();
+  bool _dangTimKiem = false;
+  String? _tuKhoaTimKiem;
 
   @override
   void initState() {
@@ -37,16 +34,18 @@ class _Admin_QuanLySanPhamScreenState extends State<Admin_QuanLySanPhamScreen> {
     _futureDanhMuc = DanhMucService.fetchDanhMuc();
     _futureDanhMuc.then((ds) {
       if (ds.isNotEmpty) {
-        _chonDanhMuc(ds.first.id, ds.first.ten);
+        _chonDanhMuc(ds.first.id);
       }
     });
   }
 
-  void _chonDanhMuc(int id, String ten) {
+  void _chonDanhMuc(int id) {
     setState(() {
       _selectedDanhMucId = id;
-      _selectedDanhMucTen = ten;
       _selectedThuongHieuId = null;
+      _dangTimKiem = false;
+      _tuKhoaTimKiem = null;
+      _searchController.clear();
       _futureSanPham = SanPhamService.fetchByDanhMucId(id);
       _futureThuongHieu = ThuongHieuService.fetchThuongHieuTheoDanhMuc(id);
     });
@@ -63,55 +62,30 @@ class _Admin_QuanLySanPhamScreenState extends State<Admin_QuanLySanPhamScreen> {
   }
 
   void _timKiemSanPham(String keyword) {
-    if (keyword.trim().isEmpty) return;
+    keyword = keyword.trim();
+    if (keyword.isEmpty) return;
     setState(() {
-      _futureSanPham = SanPhamService.fetchByKeyword(keyword.trim());
+      _dangTimKiem = true;
+      _tuKhoaTimKiem = keyword;
+      _futureSanPham = SanPhamService.fetchByKeyword(keyword);
     });
   }
 
-  void _taiLaiSanPham() {
-    if (_selectedDanhMucId != null) {
-      if (_selectedThuongHieuId != null) {
-        _futureSanPham = SanPhamService.fetchByDanhMucAndThuongHieu(
-          _selectedDanhMucId!,
-          _selectedThuongHieuId!,
-        );
-      } else {
+  void _xoaTimKiem() {
+    setState(() {
+      _dangTimKiem = false;
+      _tuKhoaTimKiem = null;
+      _searchController.clear();
+      if (_selectedDanhMucId != null) {
         _futureSanPham = SanPhamService.fetchByDanhMucId(_selectedDanhMucId!);
       }
-      setState(() {});
-    }
+    });
   }
 
-  void _xoaSanPham(int id) async {
-    final confirm = await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Xoá sản phẩm"),
-        content: const Text("Bạn có chắc muốn xoá sản phẩm này?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Không"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Xoá"),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await SanPhamService.xoa(id);
-      _taiLaiSanPham();
-    }
-  }
-
-  void _xemChiTiet(SanPham sp) {
+  void _moManHinhThemExcel() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ChiTietSanPham(sanPham: sp)),
+      MaterialPageRoute(builder: (_) => const UploadExcelScreen()),
     );
   }
 
@@ -122,168 +96,139 @@ class _Admin_QuanLySanPhamScreenState extends State<Admin_QuanLySanPhamScreen> {
         controller: _searchController,
         onSubmitted: _timKiemSanPham,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => UploadExcelScreen(onThemXong: _taiLaiSanPham),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_dangTimKiem)
+              Row(
+                children: [
+                  Text("🔍 Đang tìm: '$_tuKhoaTimKiem'"),
+                  const SizedBox(width: 10),
+                  TextButton.icon(
+                    onPressed: _xoaTimKiem,
+                    icon: const Icon(Icons.clear),
+                    label: const Text("Xoá tìm kiếm"),
+                  ),
+                ],
+              ),
+            FutureBuilder<List<DanhMuc>>(
+              future: _futureDanhMuc,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final danhMucs = snapshot.data!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Danh mục",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: danhMucs.map((dm) {
+                        return ChoiceChip(
+                          label: Text(dm.ten),
+                          selected: dm.id == _selectedDanhMucId,
+                          onSelected: (_) => _chonDanhMuc(dm.id),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                );
+              },
             ),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FutureBuilder<List<DanhMuc>>(
-                future: _futureDanhMuc,
+            const SizedBox(height: 10),
+            if (!_dangTimKiem && _futureThuongHieu != null)
+              FutureBuilder<List<ThuongHieu>>(
+                future: _futureThuongHieu,
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  final danhMucs = snapshot.data!;
+                  if (!snapshot.hasData) return const SizedBox();
+                  final ths = snapshot.data!;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DanhMucWidget(
-                        danhMucs: danhMucs,
-                        selectedId: _selectedDanhMucId,
-                        onSelect: (dm) => _chonDanhMuc(dm.id, dm.ten),
+                      const Text(
+                        "Thương hiệu",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 8),
-                      const Text("Thương hiệu"),
-                      if (_futureThuongHieu != null)
-                        FutureBuilder<List<ThuongHieu>>(
-                          future: _futureThuongHieu,
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) return const SizedBox();
-                            final ths = snapshot.data!;
-                            return Wrap(
-                              spacing: 8,
-                              children: ths.map((th) {
-                                return ChoiceChip(
-                                  label: Text(th.ten),
-                                  selected: th.id == _selectedThuongHieuId,
-                                  onSelected: (_) => _chonThuongHieu(th.id),
-                                );
-                              }).toList(),
-                            );
-                          },
-                        ),
+                      Wrap(
+                        spacing: 8,
+                        children: ths.map((th) {
+                          return ChoiceChip(
+                            label: Text(th.ten),
+                            selected: th.id == _selectedThuongHieuId,
+                            onSelected: (_) => _chonThuongHieu(th.id),
+                          );
+                        }).toList(),
+                      ),
                     ],
                   );
                 },
               ),
-              const Divider(),
-              Expanded(
-                child: (_futureSanPham != null)
-                    ? FutureBuilder<List<SanPham>>(
-                        future: _futureSanPham,
-                        builder: (ctx, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
+            const Divider(),
+            Expanded(
+              child: FutureBuilder<List<SanPham>>(
+                future: _futureSanPham,
+                builder: (ctx, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  final sps = snapshot.data!;
+                  if (sps.isEmpty) {
+                    return const Center(child: Text("Không có sản phẩm"));
+                  }
+                  return ListView.builder(
+                    itemCount: sps.length,
+                    itemBuilder: (ctx, i) {
+                      final sp = sps[i];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        elevation: 3,
+                        child: ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChiTietSanPham(sanPham: sp),
+                              ),
                             );
-                          }
-                          final sps = snapshot.data!;
-                          if (sps.isEmpty) {
-                            return const Center(
-                              child: Text("Không có sản phẩm"),
-                            );
-                          }
-                          return GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 3.5,
-                                ),
-                            itemCount: sps.length,
-                            itemBuilder: (ctx, index) {
-                              final sp = sps[index];
-                              return Card(
-                                child: ListTile(
-                                  onTap: () => _xemChiTiet(sp),
-                                  leading: Image.asset(
-                                    'assets/images/${sp.hinhAnh}',
-                                    width: 48,
-                                  ),
-                                  title: Text(sp.ten),
-                                  subtitle: Text(
-                                    "${sp.gia.toStringAsFixed(0)}đ • SL: ${sp.soLuong}",
-                                  ),
-                                  trailing: PopupMenuButton(
-                                    onSelected: (value) async {
-                                      if (value == 'sua') {
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => SuaSanPhamScreen(
-                                              sp.id,
-                                              onCapNhatXong: _taiLaiSanPham,
-                                            ),
-                                          ),
-                                        );
-                                      } else if (value == 'xoa') {
-                                        _xoaSanPham(sp.id);
-                                      } else if (value == 'tonkho') {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => TonKhoScreen(sp.id),
-                                          ),
-                                        );
-                                      } else if (value == 'nhapkho') {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => NhapKhoScreen(
-                                              sp.id,
-                                              onNhapXong: _taiLaiSanPham,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    itemBuilder: (_) => const [
-                                      PopupMenuItem(
-                                        value: 'sua',
-                                        child: Text("Sửa"),
-                                      ),
-                                      PopupMenuItem(
-                                        value: 'nhapkho',
-                                        child: Text("Nhập kho"),
-                                      ),
-                                      PopupMenuItem(
-                                        value: 'tonkho',
-                                        child: Text("Tồn kho"),
-                                      ),
-                                      PopupMenuItem(
-                                        value: 'xoa',
-                                        child: Text("Xoá"),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      )
-                    : const Center(child: Text("Vui lòng chọn danh mục")),
+                          },
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              'assets/images/${sp.hinhAnh}',
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          title: Text(
+                            sp.ten,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            "${sp.gia.toStringAsFixed(0)}đ - SL: ${sp.soLuong}",
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _moManHinhThemExcel,
+        backgroundColor: Colors.pink,
+        child: const Icon(Icons.add),
+        tooltip: 'Thêm từ Excel',
       ),
     );
   }

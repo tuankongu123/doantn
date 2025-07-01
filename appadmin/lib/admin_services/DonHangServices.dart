@@ -62,10 +62,22 @@ class DonHangService {
   }
 
   static Future<bool> duyetDon(int id) async {
-    final url = Uri.parse("http://localhost/app_api/Admin/duyet_don.php");
-    final response = await http.post(url, body: {"id": id.toString()});
+    final response = await http.post(
+      Uri.parse("http://localhost/app_api/Admin/duyet_don.php"),
+      body: {"id": id.toString()},
+    );
 
-    final result = jsonDecode(response.body);
-    return result['status'] == 'success';
+    final json = jsonDecode(response.body);
+    return json['status'] == 'success';
+  }
+
+  static Future<bool> huyDon(int id) async {
+    final response = await http.post(
+      Uri.parse("http://localhost/app_api/Admin/huy_don.php"),
+      body: {"id": id.toString()},
+    );
+
+    final json = jsonDecode(response.body);
+    return json['status'] == 'success';
   }
 }

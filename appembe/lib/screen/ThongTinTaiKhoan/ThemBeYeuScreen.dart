@@ -11,10 +11,11 @@ class ThemBeYeuScreen extends StatefulWidget {
 
 class _ThemBeYeuScreenState extends State<ThemBeYeuScreen> {
   final TextEditingController _tenBeController = TextEditingController();
+  final TextEditingController _canNangController = TextEditingController();
+
   DateTime? _ngaySinh;
   String? _gioiTinh;
-
-  final int nguoiDungId = 1; // ⚠️ mặc định test
+  final int nguoiDungId = 1;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -47,6 +48,7 @@ class _ThemBeYeuScreenState extends State<ThemBeYeuScreen> {
       tenBe: _tenBeController.text.trim(),
       ngaySinh: DateFormat('yyyy-MM-dd').format(_ngaySinh!),
       gioiTinh: _gioiTinh!,
+      canNang: double.parse(_canNangController.text.trim()),
     );
 
     if (success) {
@@ -68,7 +70,7 @@ class _ThemBeYeuScreenState extends State<ThemBeYeuScreen> {
           key: _formKey,
           child: Column(
             children: [
-              const Text("Vui lòng cho biết Ngày sinh của bé"),
+              const Text("Vui lòng cho biết thông tin của bé"),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _tenBeController,
@@ -115,6 +117,25 @@ class _ThemBeYeuScreenState extends State<ThemBeYeuScreen> {
                 onChanged: (value) => setState(() => _gioiTinh = value),
                 validator: (value) =>
                     value == null ? "Vui lòng chọn giới tính" : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _canNangController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  hintText: "Cân nặng của bé (kg)",
+                  filled: true,
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Vui lòng nhập cân nặng";
+                  }
+                  final number = double.tryParse(value);
+                  if (number == null || number <= 0) {
+                    return "Cân nặng phải là số hợp lệ";
+                  }
+                  return null;
+                },
               ),
               const Spacer(),
               ElevatedButton(

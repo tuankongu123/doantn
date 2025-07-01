@@ -28,6 +28,7 @@ class BeYeuService {
     required String tenBe,
     required String ngaySinh,
     required String gioiTinh,
+    required double canNang, // thêm cân nặng
   }) async {
     final url = Uri.parse("$_baseUrl/Them_Be_Yeu.php");
 
@@ -36,10 +37,12 @@ class BeYeuService {
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "nguoiDungId": 1,
+          "action": "them", // rất quan trọng!
+          "nguoiDungId": nguoiDungId,
           "tenBe": tenBe,
           "ngaySinh": ngaySinh,
           "gioiTinh": gioiTinh,
+          "canNang": canNang,
         }),
       );
 

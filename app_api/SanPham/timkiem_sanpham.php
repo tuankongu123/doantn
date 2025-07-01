@@ -1,6 +1,6 @@
 <?php
-require_once '../config/db.php';
-header('Content-Type: application/json');
+require_once '../config/db.php'; // kết nối CSDL bằng MySQLi
+header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_GET['keyword'])) {
     echo json_encode(['status' => 'error', 'message' => 'Thiếu từ khóa']);
@@ -9,21 +9,28 @@ if (!isset($_GET['keyword'])) {
 
 $keyword = '%' . $_GET['keyword'] . '%';
 
-try {
-    $pdo = (new Database())->getConnection();
-    $stmt = $pdo->prepare("SELECT * FROM SanPham WHERE ten LIKE ?");
-    $stmt->execute([$keyword]);
+// Sử dụng prepared statement để tránh SQL injection
+$sql = "SELECT * FROM SanPham WHERE ten LIKE ?";
+$stmt = $conn->prepare($sql);
 
-    $sanPhams = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if ($stmt) {
+    $stmt->bind_param("s", $keyword);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $sanPhams = [];
+    while ($row = $result->fetch_assoc()) {
+        $sanPhams[] = $row;
+    }
 
     echo json_encode([
         'status' => 'success',
         'data' => $sanPhams
     ]);
-} catch (Exception $e) {
+} else {
     echo json_encode([
         'status' => 'error',
-        'message' => $e->getMessage()
+        'message' => 'Lỗi truy vấn: ' . $conn->error
     ]);
 }
 ?>
